@@ -1,0 +1,57 @@
+name: phire
+description: "Phire is a conversation reader that reimagines your chat history into a book-like reading experience, with navigation and structure instead of endless scrolling."
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  intl: ^0.20.3
+  drift: ^2.34.0
+  drift_flutter: ^0.3.0
+  path_provider: ^2.1.6
+  get_it: ^9.2.1
+  file_picker: ^12.0.0-beta.7
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+  drift_dev: ^2.34.1+1
+  build_runner: ^2.15.0
+
+# The following section is specific to Flutter packages.
+flutter:
+  uses-material-design: true
+  fonts:
+    - family: NotoColorEmoji
+      fonts:
+        - asset: assets/fonts/NotoColorEmoji.ttf
+    - family: AtkinsonHyperlegibleNext
+      fonts:
+        - asset: assets/fonts/AtkinsonHyperlegibleNext-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/AtkinsonHyperlegibleNext-Light.ttf
+          weight: 300
+        - asset: assets/fonts/AtkinsonHyperlegibleNext-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/AtkinsonHyperlegibleNext-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/AtkinsonHyperlegibleNext-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/AtkinsonHyperlegibleNext-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/AtkinsonHyperlegibleNext-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/AtkinsonHyperlegibleNext-Italic.ttf
+          style: italic
+          weight: 400
