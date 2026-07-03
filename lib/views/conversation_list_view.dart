@@ -12,12 +12,18 @@ class ConversationListView extends StatelessWidget {
     required int pageIndex,
   })
   fetchPageById;
+  final Future<(int?, int?)> Function({
+    required int conversationId,
+    required DateTime timestamp,
+  })
+  fetchPageAndOffset;
 
   const ConversationListView({
     super.key,
     required this.conversations,
     required this.onImportRequested,
     required this.fetchPageById,
+    required this.fetchPageAndOffset,
   });
 
   @override
@@ -76,6 +82,11 @@ class ConversationListView extends StatelessWidget {
                                 conversationId: currentConversation.id,
                                 pageIndex: pageIndex,
                               ),
+                              fetchPageAndOffset: (DateTime timestamp) =>
+                                  fetchPageAndOffset(
+                                    conversationId: currentConversation.id,
+                                    timestamp: timestamp,
+                                  ),
                             ),
                           ),
                         );

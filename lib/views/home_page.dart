@@ -58,6 +58,24 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Future<(int?, int?)> _fetchPageAndOffset({
+    required int conversationId,
+    required DateTime timestamp,
+  }) async {
+    final offset = await messageRepository.getMessageOffsetByTimestamp(
+      conversationId: conversationId,
+      timestamp: timestamp,
+    );
+    if (offset == null) {
+      return (null, null);
+    } else {
+      final pageIndex = offset ~/ _pageSize;
+      final messageIndex = offset % _pageSize;
+
+      return (pageIndex, messageIndex);
+    }
+  }
+
   Future<void> _pickAndImportFile() async {
     try {
       FilePickerResult? result = await FilePicker.pickFiles(type: FileType.any);
@@ -104,6 +122,7 @@ class _HomePageState extends State<HomePage> {
             conversations: snapshot.data!,
             onImportRequested: _pickAndImportFile,
             fetchPageById: _fetchPage,
+            fetchPageAndOffset: _fetchPageAndOffset,
           );
         }
 

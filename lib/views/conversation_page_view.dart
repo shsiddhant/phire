@@ -1,53 +1,97 @@
 import 'package:flutter/material.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../widgets/message_tile.dart';
 import '../models/conversation_page.dart';
 
 class ConversationPageView extends StatefulWidget {
   final ConversationPage page;
+  final int? jumpMessageIndex;
+  final int jumpToken;
 
-  const ConversationPageView({super.key, required this.page});
+  const ConversationPageView({
+    super.key,
+    required this.page,
+    this.jumpMessageIndex,
+    required this.jumpToken,
+  });
 
   @override
   State<StatefulWidget> createState() => _ConversationPageView();
 }
 
 class _ConversationPageView extends State<ConversationPageView> {
-  late final ScrollController _scrollController;
+  final ItemScrollController _itemScrollController = ItemScrollController();
+  final ItemPositionsListener _itemPositionsListener =
+      ItemPositionsListener.create();
 
-  bool get _showTopFade =>
-      _scrollController.hasClients && _scrollController.offset > 0;
-
-  bool get _showBottomFade =>
-      _scrollController.hasClients &&
-      _scrollController.position.maxScrollExtent > 0 &&
-      _scrollController.offset < _scrollController.position.maxScrollExtent;
+  bool _showTopFade = false;
+  bool _showBottomFade = false;
 
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController()
-      ..addListener(() {
-        setState(() {});
-      });
+    _itemPositionsListener.itemPositions.addListener(_updateFadeVisibility);
   }
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    _itemPositionsListener.itemPositions.removeListener(_updateFadeVisibility);
     super.dispose();
+  }
+
+  void _updateFadeVisibility() {
+    final positions = _itemPositionsListener.itemPositions.value;
+    if (positions.isEmpty) {
+      return;
+    }
+    final totalItems = widget.page.messages.length;
+    final firstVisible = positions.reduce(
+      (min, p) => p.index < min.index ? p : min,
+    );
+    final lastVisible = positions.reduce(
+      (max, p) => p.index > max.index ? p : max,
+    );
+    final isAtAbsoluteTop =
+        firstVisible.index == 0 && firstVisible.itemLeadingEdge >= 0;
+
+    // itemTrailingEdge >= 1 means the bottom of the item is at or below the bottom viewport edge
+    final isAtAbsoluteBottom =
+        lastVisible.index == totalItems - 1 &&
+        lastVisible.itemTrailingEdge <= 1;
+
+    setState(() {
+      _showTopFade = !isAtAbsoluteTop;
+      _showBottomFade = !isAtAbsoluteBottom;
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant ConversationPageView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.jumpToken != oldWidget.jumpToken &&
+        widget.jumpMessageIndex != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _itemScrollController.scrollTo(
+          index: widget.jumpMessageIndex!,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final bgColor = Theme.of(context).scaffoldBackgroundColor;
-    final listview = ListView.builder(
-      controller: _scrollController,
+    final listview = ScrollablePositionedList.builder(
       itemCount: widget.page.messages.length,
-      padding: EdgeInsets.all(8),
       itemBuilder: (BuildContext context, int index) {
         final messageRepr = widget.page.messages[index];
         return MessageTile(messageRepr: messageRepr);
       },
+      itemScrollController: _itemScrollController,
+      itemPositionsListener: _itemPositionsListener,
     );
     return Stack(
       children: [
