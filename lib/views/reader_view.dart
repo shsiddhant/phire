@@ -6,12 +6,14 @@ class ReaderView extends StatefulWidget {
   final String conversationTitle;
   final int totalPages;
   final Future<ConversationPage> Function(int pageIndex) fetchPage;
+  final Future<(int?, int?)> Function(DateTime timestamp) fetchPageAndOffset;
 
   const ReaderView({
     super.key,
     required this.conversationTitle,
     required this.totalPages,
     required this.fetchPage,
+    required this.fetchPageAndOffset,
   });
 
   @override
@@ -20,6 +22,9 @@ class ReaderView extends StatefulWidget {
 
 class _ReaderViewState extends State<ReaderView> {
   int _activePageIndex = 0;
+
+  int? _jumpMessageIndex;
+  int _jumpToken = 0;
 
   ConversationPage? _currentPage;
   bool _loading = false;
@@ -63,6 +68,34 @@ class _ReaderViewState extends State<ReaderView> {
     }
   }
 
+  Future<void> _jumpToDate() async {
+    final selectedTimestamp = await showDatePicker(
+      context: context,
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+      currentDate: DateTime.now(),
+    );
+
+    if (selectedTimestamp == null) {
+      return;
+    }
+
+    final (pageIndex, messageIndex) = await widget.fetchPageAndOffset(
+      selectedTimestamp,
+    );
+
+    if (!mounted || pageIndex == null || messageIndex == null) {
+      return;
+    }
+
+    setState(() {
+      _jumpMessageIndex = messageIndex;
+      _jumpToken++;
+    });
+
+    await _loadPage(pageIndex);
+  }
+
   Widget _buildPageContent() {
     final page = _currentPage;
 
@@ -78,7 +111,11 @@ class _ReaderViewState extends State<ReaderView> {
       return const SizedBox.shrink();
     }
 
-    return ConversationPageView(page: page);
+    return ConversationPageView(
+      page: page,
+      jumpMessageIndex: _jumpMessageIndex,
+      jumpToken: _jumpToken,
+    );
   }
 
   @override
@@ -87,6 +124,12 @@ class _ReaderViewState extends State<ReaderView> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.conversationTitle),
+        actions: [
+          IconButton(
+            onPressed: _jumpToDate,
+            icon: const Icon(Icons.calendar_today),
+          ),
+        ],
       ),
       body: Stack(
         children: [

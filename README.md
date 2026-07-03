@@ -24,7 +24,8 @@ Think:
 
 ## Roadmap
 
-- [ ] Navigate to specific dates
+- [x] Navigate to specific dates
+- [ ] Track and restore reading position
 - [ ] Search through messages
 - [ ] Bookmarks
 - [ ] Annotations
