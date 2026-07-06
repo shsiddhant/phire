@@ -69,6 +69,18 @@ class _ConversationPageView extends State<ConversationPageView> {
   void didUpdateWidget(covariant ConversationPageView oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    // Reset scroll on page turn
+    if (widget.page.pageNumber != oldWidget.page.pageNumber) {
+      WidgetsBinding.instance.addPostFrameCallback((Duration _) {
+        _itemScrollController.scrollTo(
+          index: 0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      });
+    }
+
+    // Scroll to message on jump to message index trigger from parent (ReaderView)
     if (widget.jumpToken != oldWidget.jumpToken &&
         widget.jumpMessageIndex != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
