@@ -2,6 +2,10 @@
 
 **/lib/dev/
 
+# Git Exports
+*.diff
+.gitlog.*
+
 # Miscellaneous
 *.class
 *.log
