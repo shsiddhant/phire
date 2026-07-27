@@ -1,7 +1,10 @@
 import 'package:drift/drift.dart';
+import 'package:drift/isolate.dart';
+import '../exceptions/conversation_already_exists.dart';
 import '../imports/mappers/parsed_message_mapping.dart';
 import '../storage/database.dart';
 import '../imports/models/parsed.dart';
+import '../storage/drift_exception_extensions.dart';
 
 class ImportRepository {
   final AppDatabase db;
@@ -12,12 +15,19 @@ class ImportRepository {
     required String title,
     required String source,
   }) async {
-    final int conversationId = await db
-        .into(db.conversations)
-        .insertOnConflictUpdate(
-          ConversationsCompanion.insert(title: title, source: Value(source)),
-        );
-    return conversationId;
+    try {
+      final int conversationId = await db
+          .into(db.conversations)
+          .insertOnConflictUpdate(
+            ConversationsCompanion.insert(title: title, source: Value(source)),
+          );
+      return conversationId;
+    } on DriftRemoteException catch (e) {
+      if (e.isUniqueConstraint) {
+        throw const ConversationAlreadyExistsException();
+      }
+      rethrow;
+    }
   }
 
   Future<void> insertParsedMessages({

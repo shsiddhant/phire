@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as p;
 
 import '../app_dependencies_injection.dart';
 import '../mappers/message_representation_mapper.dart';
@@ -10,6 +11,7 @@ import '../models/conversation_page.dart';
 import '../repositories/conversation_repository.dart';
 import '../repositories/message_repository.dart';
 import '../services/import_whatsapp_service.dart';
+import '../widgets/conversation_title_dialog.dart';
 import 'conversation_list_view.dart';
 
 class HomePage extends StatefulWidget {
@@ -82,15 +84,37 @@ class _HomePageState extends State<HomePage> {
 
       if (result == null || result.files.first.path == null) return;
 
-      String title = result.files.first.name;
-
       File selectedFile = File(result.files.first.path!);
 
-      await _importWhatsappService.importFile(file: selectedFile, title: title);
+      final defaultTitle = p.basenameWithoutExtension(selectedFile.path);
 
-      setState(() {
-        _processedConversations = _loadConversations();
-      });
+      if (!mounted) return;
+
+      await showDialog(
+        context: context,
+        builder: (BuildContext context) => ConversationTitleDialog(
+          title: 'Import WhatsApp File',
+          defaultConversationTitle: defaultTitle,
+          actionName: 'Import',
+          onSubmit: (title) async {
+            await _importWhatsappService.importFile(
+              file: selectedFile,
+              title: title,
+            );
+
+            setState(() {
+              _processedConversations = _loadConversations();
+            });
+          },
+          onError: (error) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Failed to import file: $error')),
+              );
+            }
+          },
+        ),
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
