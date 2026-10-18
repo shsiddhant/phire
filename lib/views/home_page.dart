@@ -97,14 +97,41 @@ class _HomePageState extends State<HomePage> {
           defaultConversationTitle: defaultTitle,
           actionName: 'Import',
           onSubmit: (title) async {
-            await _importWhatsappService.importFile(
-              file: selectedFile,
-              title: title,
-            );
+            final filePath = selectedFile.path;
+            final extension = p.extension(filePath);
+
+            int failedMediaCount = 0;
+
+            if (extension == '.zip') {
+              final result = await _importWhatsappService.importZipFile(
+                filePath: filePath,
+                title: title,
+              );
+              failedMediaCount = result.failedMediaCount;
+            } else if (extension == '.txt') {
+              await _importWhatsappService.importTextFile(
+                file: selectedFile,
+                title: title,
+              );
+            } else {
+              throw const FormatException('Please select a .txt or .zip file.');
+            }
+
+            if (!context.mounted) return;
 
             setState(() {
               _processedConversations = _loadConversations();
             });
+
+            if (failedMediaCount > 0) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Chat imported! $failedMediaCount media files failed to copy.',
+                  ),
+                ),
+              );
+            }
           },
           onError: (error) {
             if (mounted) {
