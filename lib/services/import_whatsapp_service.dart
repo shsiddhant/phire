@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import '../imports/parsers/whatsapp_parser.dart';
 import '../repositories/import_repository.dart';
@@ -13,7 +14,11 @@ class ImportWhatsappService {
   ImportWhatsappService(this.importRepository);
 
   Future<int> importFile({required File file, required String title}) async {
-    final batches = parseFullExport(file, regExp, batchSize: batchSize);
+    final lineStream = file
+        .openRead()
+        .transform(utf8.decoder)
+        .transform(const LineSplitter());
+    final batches = parseFullExport(lineStream, regExp, batchSize: batchSize);
     final int conversationId = await importRepository.importConversation(
       title: title,
       source: source,

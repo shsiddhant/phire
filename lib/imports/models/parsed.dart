@@ -1,7 +1,7 @@
 import 'package:intl/intl.dart';
 
 
-final DateFormat WHATSAPP_DT_FMT = DateFormat('dd/MM/yy, HH:mm');
+final DateFormat whatsAppDateFormat = DateFormat('dd/MM/yy, HH:mm');
 
 class ParsedLine {
   String timestamp;
@@ -40,7 +40,7 @@ class ParsedMessage {
 
   factory ParsedMessage.fromParsedLine(ParsedLine parsedLine) {
     return ParsedMessage(
-      timestamp: WHATSAPP_DT_FMT.parseStrict(parsedLine.timestamp),
+      timestamp: whatsAppDateFormat.parseStrict(parsedLine.timestamp),
       sender: parsedLine.sender,
       text: parsedLine.text,
       attachment: parsedLine.attachment,

@@ -1,4 +1,3 @@
-import 'dart:io';
 import '../models/parsed.dart';
 
 ParsedLine? parseLine({required String line, required RegExp regExp}) {
@@ -22,19 +21,18 @@ ParsedLine? parseLine({required String line, required RegExp regExp}) {
 }
 
 Stream<List<ParsedMessage>> parseFullExport(
-  File file,
+  Stream<String> lineStream,
   RegExp regExp, {
   int batchSize = 5000,
 }) async* {
-  final lines = await file.readAsLines();
+  // final lines = await file.readAsLines();
 
   List<ParsedMessage> messageBatch = [];
   ParsedLine? parsedLine;
   int lineNumber = 0;
 
   try {
-    for (lineNumber; lineNumber < lines.length; lineNumber++) {
-      final line = lines[lineNumber];
+    await for (final line in lineStream) {
       if (messageBatch.length > batchSize) {
         yield messageBatch.sublist(0, messageBatch.length - 1);
         messageBatch = [messageBatch.last];
@@ -50,6 +48,8 @@ Stream<List<ParsedMessage>> parseFullExport(
       } else if (parsedLine == null && lineNumber > 0) {
         messageBatch.last.text = '${messageBatch.last.text}\n$line';
       }
+
+      lineNumber++;
     }
   } on FormatException catch (e) {
     throw FormatException('Error parsing line: $lineNumber\n${e.message}');
