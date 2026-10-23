@@ -71,12 +71,10 @@ class ImportWhatsappService {
 
     for (final mediaFile in mediaFiles) {
       try {
-        final mediaBytes = mediaFile.readBytes();
-        if (mediaBytes == null) continue;
-
         final localFilePath = join(mediaPath, mediaFile.name);
-        final localFile = File(localFilePath);
-        await localFile.writeAsBytes(mediaBytes);
+        final outputStream = OutputFileStream(localFilePath);
+        mediaFile.writeContent(outputStream);
+        await outputStream.close();
       } catch (e) {
         failedMediaCount++;
       }
