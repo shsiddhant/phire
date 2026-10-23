@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'package:path/path.dart' as p;
 import '../utils/date_utils.dart';
 import '../models/message.dart';
 import '../storage/database.dart';
@@ -12,14 +13,31 @@ extension MessageDataToRepresentation on MessageData {
     required bool isFirstOfDay,
     required DateFormat dateFormat,
     required DateFormat timeFormat,
+    required String conversationMediaPath,
   }) {
     final formattedTime = timeFormat.format(timestamp);
     final DateTime localTimestamp = timestamp.toLocal();
     final dayMarker = isFirstOfDay ? dateFormat.format(localTimestamp) : null;
+
+    bool hasAttachment = attachment != null && attachment!.isNotEmpty;
+    final attachmentFilePath = hasAttachment
+        ? p.join(conversationMediaPath, attachment)
+        : null;
+    final renderAttachment =
+        hasAttachment &&
+        attachment!.startsWith('STK') &&
+        attachment!.endsWith('.webp');
+
+    final messageTextRepr = renderAttachment
+        ? messageText.replaceAll('$attachment (file attached)', '')
+        : messageText;
+
     return MessageRepresentation(
       formattedTime: formattedTime,
       senderName: sender,
-      messageText: messageText,
+      messageText: messageTextRepr,
+      attachmentFilePath: attachmentFilePath,
+      renderAttachment: renderAttachment,
       showSenderHeader: showSenderHeader,
       isFirstOfDay: isFirstOfDay,
       dayMarker: dayMarker,
@@ -29,6 +47,7 @@ extension MessageDataToRepresentation on MessageData {
 
 List<MessageRepresentation> buildRepresentationFromDb(
   List<MessageData> messages,
+  String conversationMediaPath,
 ) {
   List<MessageRepresentation> messagesRepr = [];
 
@@ -42,6 +61,7 @@ List<MessageRepresentation> buildRepresentationFromDb(
       isFirstOfDay: true,
       dateFormat: dateFormat,
       timeFormat: timeFormat,
+      conversationMediaPath: conversationMediaPath,
     ),
   );
 
@@ -56,6 +76,7 @@ List<MessageRepresentation> buildRepresentationFromDb(
         isFirstOfDay: isFirstOfDay,
         dateFormat: dateFormat,
         timeFormat: timeFormat,
+        conversationMediaPath: conversationMediaPath,
       ),
     );
   }

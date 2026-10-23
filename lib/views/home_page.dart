@@ -11,6 +11,7 @@ import '../models/conversation_page.dart';
 import '../repositories/conversation_repository.dart';
 import '../repositories/message_repository.dart';
 import '../services/import_whatsapp_service.dart';
+import '../utils/path_utils.dart';
 import '../widgets/conversation_title_dialog.dart';
 import 'conversation_list_view.dart';
 
@@ -54,9 +55,10 @@ class _HomePageState extends State<HomePage> {
       offset: offset,
       limit: _pageSize,
     );
+    final conversationMediaPath = await getConversationMediaPath(conversationId);
     return ConversationPage(
       pageNumber: pageIndex + 1,
-      messages: buildRepresentationFromDb(messages),
+      messages: buildRepresentationFromDb(messages, conversationMediaPath),
     );
   }
 

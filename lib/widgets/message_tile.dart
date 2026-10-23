@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import '../models/message.dart';
 
@@ -19,6 +21,8 @@ class MessageTile extends StatelessWidget {
           _MessageRow(
             formattedTime: messageRepr.formattedTime,
             messageText: messageRepr.messageText,
+            attachmentFilePath: messageRepr.attachmentFilePath,
+            renderAttachment: messageRepr.renderAttachment,
           ),
         ],
       ),
@@ -58,7 +62,7 @@ class _SenderHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsetsGeometry.only(top: 4.0),
+      padding: EdgeInsetsGeometry.only(top: 4.0, bottom: 4.0),
       child: Text(
         sender,
         textScaler: TextScaler.linear(1),
@@ -74,11 +78,20 @@ class _SenderHeader extends StatelessWidget {
 class _MessageRow extends StatelessWidget {
   final String formattedTime;
   final String messageText;
+  final String? attachmentFilePath;
+  final bool renderAttachment;
 
-  const _MessageRow({required this.formattedTime, required this.messageText});
+  const _MessageRow({
+    required this.formattedTime,
+    required this.messageText,
+    this.attachmentFilePath,
+    required this.renderAttachment,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme.bodyMedium;
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -86,17 +99,61 @@ class _MessageRow extends StatelessWidget {
           width: 70,
           child: Text(
             formattedTime,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(200),
+            style: textTheme?.copyWith(
+              color: colorScheme.onSurfaceVariant.withAlpha(200),
             ),
           ),
         ),
         Expanded(
-          child: SelectableText(
-            messageText,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (renderAttachment) ...[
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4.0),
+                  child: Container(
+                    constraints: const BoxConstraints(maxHeight: 96),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
+                    child: Image.file(
+                      File(attachmentFilePath!),
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.broken_image, color: Colors.red),
+                              SizedBox(width: 8),
+                              Text(
+                                'Image missing',
+                                style: textTheme?.copyWith(
+                                  color: colorScheme.onSurface,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 6),
+              ],
+
+              if (messageText.isNotEmpty)
+                SelectableText(
+                  messageText,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    fontSize: renderAttachment ? 13.5 : 14,
+                  ),
+                ),
+            ],
           ),
         ),
       ],

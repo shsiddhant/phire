@@ -31,6 +31,8 @@ class MessageRepresentation {
   final String formattedTime;
   final String senderName;
   final String messageText;
+  final String? attachmentFilePath;
+  final bool renderAttachment;
   final bool showSenderHeader;
   final bool isFirstOfDay;
   final String? dayMarker;
@@ -39,6 +41,8 @@ class MessageRepresentation {
     required this.formattedTime,
     required this.senderName,
     required this.messageText,
+    this.attachmentFilePath,
+    required this.renderAttachment,
     required this.showSenderHeader,
     required this.isFirstOfDay,
     this.dayMarker,
