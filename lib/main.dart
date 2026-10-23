@@ -12,32 +12,28 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  static ThemeData _getTheme(ThemeData baseTheme, Brightness brightness) {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: Color(0xFFBF0808),
+      brightness: brightness,
+    );
+    final customTextTheme = baseTheme.textTheme.apply(
+      fontSizeFactor: 1.1,
+      fontFamily: 'AtkinsonHyperlegibleNext',
+      fontFamilyFallback: const ['NotoColorEmoji'],
+      bodyColor: colorScheme.onSurface,
+      displayColor: colorScheme.onSurface,
+    );
+    return ThemeData(colorScheme: colorScheme, textTheme: customTextTheme);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final baseTheme = Theme.of(context);
     return MaterialApp(
-      title: 'memory.chat',
-      theme: ThemeData(
-        textTheme: Theme.of(context).textTheme.apply(
-          fontSizeFactor: 1.1,
-          fontFamily: 'AtkinsonHyperlegibleNext',
-          fontFamilyFallback: ['NotoColorEmoji'],
-        ),
-        colorScheme: .fromSeed(
-          seedColor: Color(0xFFBF0808),
-          brightness: Brightness.light,
-        ),
-      ),
-      darkTheme: ThemeData(
-        textTheme: Theme.of(context).textTheme.apply(
-          fontSizeFactor: 1.1,
-          fontFamily: 'AtkinsonHyperlegibleNext',
-          fontFamilyFallback: ['NotoColorEmoji'],
-        ),
-        colorScheme: .fromSeed(
-          seedColor: Color(0xFFBF0808),
-          brightness: Brightness.dark,
-        ),
-      ),
+      title: 'Phire',
+      theme: _getTheme(baseTheme, Brightness.light),
+      darkTheme: _getTheme(baseTheme, Brightness.dark),
       // home: const WidgetPlayground(),
       home: const HomePage(),
     );

@@ -148,9 +148,8 @@ class _MessageRow extends StatelessWidget {
               if (messageText.isNotEmpty)
                 SelectableText(
                   messageText,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  style: textTheme?.copyWith(
                     color: colorScheme.onSurfaceVariant,
-                    fontSize: renderAttachment ? 13.5 : 14,
                   ),
                 ),
             ],
