@@ -28,8 +28,8 @@ extension MessageDataToRepresentation on MessageData {
         attachment!.startsWith('STK') &&
         attachment!.endsWith('.webp');
 
-    final messageTextRepr = renderAttachment
-        ? messageText.replaceAll('$attachment (file attached)', '')
+    final messageTextRepr = hasAttachment
+        ? messageText.replaceAll('$attachment (file attached)', '').trimLeft()
         : messageText;
 
     return MessageRepresentation(

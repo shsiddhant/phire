@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:open_filex/open_filex.dart';
+import 'package:path/path.dart' as p;
 import '../models/message.dart';
 
 class MessageTile extends StatelessWidget {
@@ -75,6 +77,63 @@ class _SenderHeader extends StatelessWidget {
   }
 }
 
+class _ExternalLink extends StatelessWidget {
+  final String attachmentFilePath;
+
+  const _ExternalLink({required this.attachmentFilePath});
+
+  IconData _getFileIcon(String path) {
+    final extension = path.split('.').last.toLowerCase();
+    switch (extension) {
+      case 'pdf':
+        return Icons.picture_as_pdf;
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+        return Icons.image;
+      case 'zip':
+      case 'rar':
+        return Icons.folder_zip;
+      case 'doc':
+      case 'docx':
+        return Icons.description;
+      default:
+        return Icons.insert_drive_file;
+    }
+  }
+
+  Future<void> _openFile(String filePath) async {
+    await OpenFilex.open(filePath);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final fileName = p.basename(attachmentFilePath);
+    final colorScheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6.0),
+      child: TextButton.icon(
+        onPressed: () => _openFile(attachmentFilePath),
+        style: TextButton.styleFrom(
+          backgroundColor: colorScheme.surfaceContainerHighest.withAlpha(100),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+        icon: Icon(
+          _getFileIcon(attachmentFilePath),
+          size: 14,
+          color: colorScheme.primary,
+        ),
+        label: Text(
+          fileName,
+          overflow: TextOverflow.ellipsis,
+          textScaler: TextScaler.linear(0.90),
+        ),
+      ),
+    );
+  }
+}
+
 class _MessageRow extends StatelessWidget {
   final String formattedTime;
   final String messageText;
@@ -92,70 +151,79 @@ class _MessageRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme.bodyMedium;
     final colorScheme = Theme.of(context).colorScheme;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 70,
-          child: Text(
-            formattedTime,
-            style: textTheme?.copyWith(
-              color: colorScheme.onSurfaceVariant.withAlpha(200),
+    final hasAttachment =
+        attachmentFilePath != null && attachmentFilePath!.isNotEmpty;
+    final padding = hasAttachment ? 4.0 : 0.0;
+    return Padding(
+      padding: EdgeInsetsGeometry.symmetric(vertical: padding),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 70,
+            child: Text(
+              formattedTime,
+              style: textTheme?.copyWith(
+                color: colorScheme.onSurfaceVariant.withAlpha(200),
+              ),
             ),
           ),
-        ),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (renderAttachment) ...[
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4.0),
-                  child: Container(
-                    constraints: const BoxConstraints(maxHeight: 96),
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHighest,
-                    child: Image.file(
-                      File(attachmentFilePath!),
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.broken_image, color: Colors.red),
-                              SizedBox(width: 8),
-                              Text(
-                                'Image missing',
-                                style: textTheme?.copyWith(
-                                  color: colorScheme.onSurface,
-                                  fontSize: 12,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (renderAttachment) ...[
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4.0),
+                    child: Container(
+                      constraints: const BoxConstraints(maxHeight: 96),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
+                      child: Image.file(
+                        File(attachmentFilePath!),
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.broken_image, color: Colors.red),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Image missing',
+                                  style: textTheme?.copyWith(
+                                    color: colorScheme.onSurface,
+                                    fontSize: 12,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 6),
-              ],
+                  const SizedBox(height: 6),
+                ],
 
-              if (messageText.isNotEmpty)
-                SelectableText(
-                  messageText,
-                  style: textTheme?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
+                if (hasAttachment && !renderAttachment)
+                  _ExternalLink(attachmentFilePath: attachmentFilePath!),
+
+                if (messageText.isNotEmpty)
+                  SelectableText(
+                    messageText,
+                    style: textTheme?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
