@@ -40,4 +40,25 @@ class ConversationRepository {
       );
     }).toList();
   }
+
+  // Reading progress
+  Future<void> updateReadingProgress({
+    required int conversationId,
+    required int messageId,
+  }) async {
+    await db
+        .into(db.readingProgress)
+        .insertOnConflictUpdate(
+          ReadingProgressCompanion(
+            conversationId: Value(conversationId),
+            messageId: Value(messageId),
+          ),
+        );
+  }
+
+  Future<ReadingProgressData?> getReadingProgress(int conversationId) async {
+    return await (db.select(db.readingProgress)
+          ..where((tbl) => tbl.conversationId.equals(conversationId)))
+        .getSingleOrNull();
+  }
 }
