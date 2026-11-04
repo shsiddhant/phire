@@ -49,4 +49,27 @@ class MessageRepository {
 
     return await query.map((row) => row.read(countExp)).getSingle();
   }
+
+  Future<int?> getMessageOffsetByMessageId({
+    required int conversationId,
+    required int messageId,
+  }) async {
+    final table = db.messages;
+    final countExp = countAll();
+    Expression<bool> conversationIdFilter = db.messages.conversationId.equals(
+      conversationId,
+    );
+    Expression<bool> messageIdFilter = db.messages.id.isSmallerThanValue(
+      messageId,
+    );
+    final query = db.selectOnly(table)
+      ..addColumns([countExp])
+      ..where(conversationIdFilter & messageIdFilter)
+      ..orderBy([
+        OrderingTerm(expression: table.id),
+        OrderingTerm(expression: table.timestamp),
+      ]);
+
+    return await query.map((row) => row.read(countExp)).getSingleOrNull();
+  }
 }
