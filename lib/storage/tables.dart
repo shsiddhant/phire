@@ -18,3 +18,13 @@ class Conversations extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get modifiedAt => dateTime().withDefault(currentDateAndTime)();
 }
+
+@DataClassName('ReadingProgressData')
+class ReadingProgress extends Table {
+  IntColumn get conversationId => integer().references(Conversations, #id)();
+  IntColumn get messageId => integer().references(Messages, #id)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {conversationId};
+}
