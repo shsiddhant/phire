@@ -7,17 +7,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../models/conversation.dart';
-import '../models/conversation_page.dart';
 import 'reader_view.dart';
 
 class ConversationListView extends StatelessWidget {
   final List<ConversationListItem> conversations;
   final VoidCallback onImportRequested;
-  final Future<ConversationPage> Function({
-    required int conversationId,
-    required int pageIndex,
-  })
-  fetchPageById;
   final Future<(int?, int?)> Function({
     required int conversationId,
     required DateTime timestamp,
@@ -34,7 +28,6 @@ class ConversationListView extends StatelessWidget {
     super.key,
     required this.conversations,
     required this.onImportRequested,
-    required this.fetchPageById,
     required this.fetchPageAndOffset,
     required this.onProgressChanged,
     required this.getInitalPageIndex,
@@ -115,14 +108,11 @@ class ConversationListView extends StatelessWidget {
                                   }
                                   final int initialPageIndex = snapshot.data!;
                                   return ReaderView(
+                                    conversationId: currentConversation.id,
                                     conversationTitle:
                                         currentConversation.title,
                                     totalPages: currentConversation.totalPages,
                                     initialPageIndex: initialPageIndex,
-                                    fetchPage: (int pageIndex) => fetchPageById(
-                                      conversationId: currentConversation.id,
-                                      pageIndex: pageIndex,
-                                    ),
                                     fetchPageAndOffset: (DateTime timestamp) =>
                                         fetchPageAndOffset(
                                           conversationId:

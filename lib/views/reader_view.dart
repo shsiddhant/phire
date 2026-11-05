@@ -5,23 +5,27 @@
 */
 
 import 'package:flutter/material.dart';
+import '../app_dependencies_injection.dart';
+import '../mappers/message_representation_mapper.dart';
 import '../models/conversation_page.dart';
+import '../repositories/message_repository.dart';
+import '../utils/path_utils.dart';
 import 'conversation_page_view.dart';
 
 class ReaderView extends StatefulWidget {
+  final int conversationId;
   final String conversationTitle;
   final int totalPages;
   final int initialPageIndex;
-  final Future<ConversationPage> Function(int pageIndex) fetchPage;
   final Future<(int?, int?)> Function(DateTime timestamp) fetchPageAndOffset;
   final void Function(int messageId) onProgressChanged;
 
   const ReaderView({
     super.key,
+    required this.conversationId,
     required this.conversationTitle,
     required this.totalPages,
     required this.initialPageIndex,
-    required this.fetchPage,
     required this.fetchPageAndOffset,
     required this.onProgressChanged,
   });
@@ -31,6 +35,9 @@ class ReaderView extends StatefulWidget {
 }
 
 class _ReaderViewState extends State<ReaderView> {
+  final int _pageSize = 30;
+  final MessageRepository _messageRepository = locator<MessageRepository>();
+
   int _activePageIndex = 0;
 
   int? _jumpMessageIndex;
@@ -46,6 +53,22 @@ class _ReaderViewState extends State<ReaderView> {
     _loadPage(widget.initialPageIndex);
   }
 
+  Future<ConversationPage> _fetchPage({required int pageIndex}) async {
+    final int offset = pageIndex * _pageSize;
+    final messages = await _messageRepository.getMessagesByConversationId(
+      conversationId: widget.conversationId,
+      offset: offset,
+      limit: _pageSize,
+    );
+    final conversationMediaPath = await getConversationMediaPath(
+      widget.conversationId,
+    );
+    return ConversationPage(
+      pageNumber: pageIndex + 1,
+      messages: buildRepresentationFromDb(messages, conversationMediaPath),
+    );
+  }
+
   Future<void> _loadPage(int pageIndex) async {
     setState(() {
       _loading = true;
@@ -53,7 +76,7 @@ class _ReaderViewState extends State<ReaderView> {
     });
 
     try {
-      final page = await widget.fetchPage(pageIndex);
+      final page = await _fetchPage(pageIndex: pageIndex);
 
       if (!mounted) return;
 

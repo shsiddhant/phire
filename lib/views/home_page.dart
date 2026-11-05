@@ -11,13 +11,10 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 
 import '../app_dependencies_injection.dart';
-import '../mappers/message_representation_mapper.dart';
 import '../models/conversation.dart';
-import '../models/conversation_page.dart';
 import '../repositories/conversation_repository.dart';
 import '../repositories/message_repository.dart';
 import '../services/import_whatsapp_service.dart';
-import '../utils/path_utils.dart';
 import '../widgets/conversation_title_dialog.dart';
 import 'conversation_list_view.dart';
 
@@ -49,25 +46,6 @@ class _HomePageState extends State<HomePage> {
     );
 
     return conversations;
-  }
-
-  Future<ConversationPage> _fetchPage({
-    required int conversationId,
-    required int pageIndex,
-  }) async {
-    final int offset = pageIndex * _pageSize;
-    final messages = await messageRepository.getMessagesByConversationId(
-      conversationId: conversationId,
-      offset: offset,
-      limit: _pageSize,
-    );
-    final conversationMediaPath = await getConversationMediaPath(
-      conversationId,
-    );
-    return ConversationPage(
-      pageNumber: pageIndex + 1,
-      messages: buildRepresentationFromDb(messages, conversationMediaPath),
-    );
   }
 
   Future<(int?, int?)> _fetchPageAndOffset({
@@ -210,7 +188,6 @@ class _HomePageState extends State<HomePage> {
           return ConversationListView(
             conversations: snapshot.data!,
             onImportRequested: _pickAndImportFile,
-            fetchPageById: _fetchPage,
             fetchPageAndOffset: _fetchPageAndOffset,
             onProgressChanged: _onReadingProgressChanged,
             getInitalPageIndex: _getInitialPageIndex,
