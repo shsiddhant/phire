@@ -55,7 +55,9 @@ class _HomePageState extends State<HomePage> {
       offset: offset,
       limit: _pageSize,
     );
-    final conversationMediaPath = await getConversationMediaPath(conversationId);
+    final conversationMediaPath = await getConversationMediaPath(
+      conversationId,
+    );
     return ConversationPage(
       pageNumber: pageIndex + 1,
       messages: buildRepresentationFromDb(messages, conversationMediaPath),
@@ -77,6 +79,34 @@ class _HomePageState extends State<HomePage> {
       final messageIndex = offset % _pageSize;
 
       return (pageIndex, messageIndex);
+    }
+  }
+
+  Future<void> _onReadingProgressChanged({
+    required int conversationId,
+    required int messageId,
+  }) async {
+    await conversationRepository.updateReadingProgress(
+      conversationId: conversationId,
+      messageId: messageId,
+    );
+  }
+
+  Future<int> _getInitialPageIndex({required int conversationId}) async {
+    final progress = await conversationRepository.getReadingProgress(
+      conversationId,
+    );
+    if (progress == null) {
+      return 0;
+    }
+    final offset = await messageRepository.getMessageOffsetByMessageId(
+      conversationId: conversationId,
+      messageId: progress.messageId,
+    );
+    if (offset == null) {
+      return 0;
+    } else {
+      return offset ~/ _pageSize;
     }
   }
 
@@ -176,6 +206,8 @@ class _HomePageState extends State<HomePage> {
             onImportRequested: _pickAndImportFile,
             fetchPageById: _fetchPage,
             fetchPageAndOffset: _fetchPageAndOffset,
+            onProgressChanged: _onReadingProgressChanged,
+            getInitalPageIndex: _getInitialPageIndex,
           );
         }
 

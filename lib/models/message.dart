@@ -28,6 +28,7 @@ class Message {
 }
 
 class MessageRepresentation {
+  final int id;
   final String formattedTime;
   final String senderName;
   final String messageText;
@@ -38,6 +39,7 @@ class MessageRepresentation {
   final String? dayMarker;
 
   MessageRepresentation({
+    required this.id,
     required this.formattedTime,
     required this.senderName,
     required this.messageText,

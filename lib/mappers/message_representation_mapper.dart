@@ -33,6 +33,7 @@ extension MessageDataToRepresentation on MessageData {
         : messageText;
 
     return MessageRepresentation(
+      id: id,
       formattedTime: formattedTime,
       senderName: sender,
       messageText: messageTextRepr,

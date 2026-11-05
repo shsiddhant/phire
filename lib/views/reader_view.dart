@@ -5,15 +5,19 @@ import 'conversation_page_view.dart';
 class ReaderView extends StatefulWidget {
   final String conversationTitle;
   final int totalPages;
+  final int initialPageIndex;
   final Future<ConversationPage> Function(int pageIndex) fetchPage;
   final Future<(int?, int?)> Function(DateTime timestamp) fetchPageAndOffset;
+  final void Function(int messageId) onProgressChanged;
 
   const ReaderView({
     super.key,
     required this.conversationTitle,
     required this.totalPages,
+    required this.initialPageIndex,
     required this.fetchPage,
     required this.fetchPageAndOffset,
+    required this.onProgressChanged,
   });
 
   @override
@@ -33,7 +37,7 @@ class _ReaderViewState extends State<ReaderView> {
   @override
   void initState() {
     super.initState();
-    _loadPage(0);
+    _loadPage(widget.initialPageIndex);
   }
 
   Future<void> _loadPage(int pageIndex) async {
@@ -52,6 +56,11 @@ class _ReaderViewState extends State<ReaderView> {
         _currentPage = page;
         _loading = false;
       });
+
+      if (page.messages.isNotEmpty) {
+        final firstMessageId = page.messages.first.id;
+        widget.onProgressChanged(firstMessageId);
+      }
     } catch (e) {
       if (!mounted) return;
 

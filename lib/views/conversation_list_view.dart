@@ -17,6 +17,12 @@ class ConversationListView extends StatelessWidget {
     required DateTime timestamp,
   })
   fetchPageAndOffset;
+  final Future<void> Function({
+    required int conversationId,
+    required int messageId,
+  })
+  onProgressChanged;
+  final Future<int> Function({required int conversationId}) getInitalPageIndex;
 
   const ConversationListView({
     super.key,
@@ -24,6 +30,8 @@ class ConversationListView extends StatelessWidget {
     required this.onImportRequested,
     required this.fetchPageById,
     required this.fetchPageAndOffset,
+    required this.onProgressChanged,
+    required this.getInitalPageIndex,
   });
 
   @override
@@ -75,19 +83,56 @@ class ConversationListView extends StatelessWidget {
                         Navigator.push(
                           context,
                           CupertinoPageRoute(
-                            builder: (BuildContext context) => ReaderView(
-                              conversationTitle: currentConversation.title,
-                              totalPages: currentConversation.totalPages,
-                              fetchPage: (int pageIndex) => fetchPageById(
-                                conversationId: currentConversation.id,
-                                pageIndex: pageIndex,
-                              ),
-                              fetchPageAndOffset: (DateTime timestamp) =>
-                                  fetchPageAndOffset(
-                                    conversationId: currentConversation.id,
-                                    timestamp: timestamp,
-                                  ),
-                            ),
+                            builder: (BuildContext context) {
+                              return FutureBuilder(
+                                future: getInitalPageIndex(
+                                  conversationId: currentConversation.id,
+                                ),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return const Scaffold(
+                                      body: Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    );
+                                  }
+
+                                  if (snapshot.hasError) {
+                                    return Scaffold(
+                                      body: Center(
+                                        child: Text(
+                                          'Error loading data: ${snapshot.error}',
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                  final int initialPageIndex = snapshot.data!;
+                                  return ReaderView(
+                                    conversationTitle:
+                                        currentConversation.title,
+                                    totalPages: currentConversation.totalPages,
+                                    initialPageIndex: initialPageIndex,
+                                    fetchPage: (int pageIndex) => fetchPageById(
+                                      conversationId: currentConversation.id,
+                                      pageIndex: pageIndex,
+                                    ),
+                                    fetchPageAndOffset: (DateTime timestamp) =>
+                                        fetchPageAndOffset(
+                                          conversationId:
+                                              currentConversation.id,
+                                          timestamp: timestamp,
+                                        ),
+                                    onProgressChanged: (int messageId) =>
+                                        onProgressChanged(
+                                          conversationId:
+                                              currentConversation.id,
+                                          messageId: messageId,
+                                        ),
+                                  );
+                                },
+                              );
+                            },
                           ),
                         );
                       },
