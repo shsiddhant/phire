@@ -13,7 +13,6 @@ import 'package:path/path.dart' as p;
 import '../app_dependencies_injection.dart';
 import '../models/conversation.dart';
 import '../repositories/conversation_repository.dart';
-import '../repositories/message_repository.dart';
 import '../services/import_whatsapp_service.dart';
 import '../widgets/conversation_title_dialog.dart';
 import 'conversation_list_view.dart';
@@ -29,7 +28,6 @@ class _HomePageState extends State<HomePage> {
   final int _pageSize = 30;
   final ConversationRepository conversationRepository =
       locator<ConversationRepository>();
-  final MessageRepository messageRepository = locator<MessageRepository>();
   final ImportWhatsappService _importWhatsappService =
       locator<ImportWhatsappService>();
   late Future<List<ConversationListItem>> _processedConversations;
@@ -46,24 +44,6 @@ class _HomePageState extends State<HomePage> {
     );
 
     return conversations;
-  }
-
-  Future<int> _getInitialPageIndex({required int conversationId}) async {
-    final progress = await conversationRepository.getReadingProgress(
-      conversationId,
-    );
-    if (progress == null) {
-      return 0;
-    }
-    final offset = await messageRepository.getMessageOffsetByMessageId(
-      conversationId: conversationId,
-      messageId: progress.messageId,
-    );
-    if (offset == null) {
-      return 0;
-    } else {
-      return offset ~/ _pageSize;
-    }
   }
 
   Future<void> _pickAndImportFile() async {
@@ -160,7 +140,6 @@ class _HomePageState extends State<HomePage> {
           return ConversationListView(
             conversations: snapshot.data!,
             onImportRequested: _pickAndImportFile,
-            getInitalPageIndex: _getInitialPageIndex,
           );
         }
 

@@ -18,14 +18,12 @@ class ReaderView extends StatefulWidget {
   final int conversationId;
   final String conversationTitle;
   final int totalPages;
-  final int initialPageIndex;
 
   const ReaderView({
     super.key,
     required this.conversationId,
     required this.conversationTitle,
     required this.totalPages,
-    required this.initialPageIndex,
   });
 
   @override
@@ -50,7 +48,50 @@ class _ReaderViewState extends State<ReaderView> {
   @override
   void initState() {
     super.initState();
-    _loadPage(widget.initialPageIndex);
+    _initialize();
+  }
+
+  Future<int> _getInitialPageIndex() async {
+    final progress = await _conversationRepository.getReadingProgress(
+      widget.conversationId,
+    );
+    if (progress == null) {
+      return 0;
+    }
+    final offset = await _messageRepository.getMessageOffsetByMessageId(
+      conversationId: widget.conversationId,
+      messageId: progress.messageId,
+    );
+    if (offset == null) {
+      return 0;
+    }
+
+    return PagePosition.fromOffset(
+      offset: offset,
+      pageSize: _pageSize,
+    ).pageIndex;
+  }
+
+  Future<void> _initialize() async {
+    try {
+      final initialPageIndex = await _getInitialPageIndex();
+      final page = await _fetchPage(pageIndex: initialPageIndex);
+
+      if (!mounted) return;
+
+      setState(() {
+        _activePageIndex = initialPageIndex;
+        _currentPage = page;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _loading = false;
+        _error = e;
+      });
+    }
   }
 
   Future<ConversationPage> _fetchPage({required int pageIndex}) async {
@@ -178,62 +219,67 @@ class _ReaderViewState extends State<ReaderView> {
           ),
         ],
       ),
-      body: Stack(
-        children: [
-          Padding(
-            padding: EdgeInsets.only(bottom: 80, top: 8, left: 20, right: 20),
-            child: _buildPageContent(),
-          ),
-          Positioned(
-            bottom: 24,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Material(
-                elevation: 8,
-                borderRadius: BorderRadius.circular(10),
-                color: Theme.of(context).colorScheme.inversePrimary,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 6,
-                  ),
-                  child: DefaultTextStyle(
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      fontWeight: FontWeight.w600,
+      body: SizedBox.expand(
+        child: Stack(
+          children: [
+            Padding(
+              padding: EdgeInsets.only(bottom: 80, top: 8, left: 20, right: 20),
+              child: _buildPageContent(),
+            ),
+            Positioned(
+              bottom: 24,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Material(
+                  elevation: 8,
+                  borderRadius: BorderRadius.circular(10),
+                  color: Theme.of(context).colorScheme.inversePrimary,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 6,
                     ),
-                    child: IconTheme(
-                      data: IconThemeData(
+                    child: DefaultTextStyle(
+                      style: TextStyle(
                         color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        fontWeight: FontWeight.w600,
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.chevron_left),
-                            onPressed: _activePageIndex > 0
-                                ? () => _goToPage(_activePageIndex - 1)
-                                : null,
-                          ),
-                          Text(
-                            'Page ${_activePageIndex + 1} / ${widget.totalPages}',
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.chevron_right),
-                            onPressed: _activePageIndex < widget.totalPages - 1
-                                ? () => _goToPage(_activePageIndex + 1)
-                                : null,
-                          ),
-                        ],
+                      child: IconTheme(
+                        data: IconThemeData(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onPrimaryContainer,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.chevron_left),
+                              onPressed: _activePageIndex > 0
+                                  ? () => _goToPage(_activePageIndex - 1)
+                                  : null,
+                            ),
+                            Text(
+                              'Page ${_activePageIndex + 1} / ${widget.totalPages}',
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.chevron_right),
+                              onPressed:
+                                  _activePageIndex < widget.totalPages - 1
+                                  ? () => _goToPage(_activePageIndex + 1)
+                                  : null,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -12,13 +12,11 @@ import 'reader_view.dart';
 class ConversationListView extends StatelessWidget {
   final List<ConversationListItem> conversations;
   final VoidCallback onImportRequested;
-  final Future<int> Function({required int conversationId}) getInitalPageIndex;
 
   const ConversationListView({
     super.key,
     required this.conversations,
     required this.onImportRequested,
-    required this.getInitalPageIndex,
   });
 
   @override
@@ -71,38 +69,10 @@ class ConversationListView extends StatelessWidget {
                           context,
                           CupertinoPageRoute(
                             builder: (BuildContext context) {
-                              return FutureBuilder(
-                                future: getInitalPageIndex(
-                                  conversationId: currentConversation.id,
-                                ),
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return const Scaffold(
-                                      body: Center(
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                    );
-                                  }
-
-                                  if (snapshot.hasError) {
-                                    return Scaffold(
-                                      body: Center(
-                                        child: Text(
-                                          'Error loading data: ${snapshot.error}',
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                  final int initialPageIndex = snapshot.data!;
-                                  return ReaderView(
-                                    conversationId: currentConversation.id,
-                                    conversationTitle:
-                                        currentConversation.title,
-                                    totalPages: currentConversation.totalPages,
-                                    initialPageIndex: initialPageIndex,
-                                  );
-                                },
+                              return ReaderView(
+                                conversationId: currentConversation.id,
+                                conversationTitle: currentConversation.title,
+                                totalPages: currentConversation.totalPages,
                               );
                             },
                           ),
