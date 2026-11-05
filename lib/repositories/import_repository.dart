@@ -1,3 +1,9 @@
+/*
+  SPDX-FileCopyrightText: 2026 Siddhant Sharma <sharmasiddhant@proton.me>
+
+  SPDX-License-Identifier: GPL-3.0-or-later
+*/
+
 import 'package:drift/drift.dart';
 import 'package:drift/isolate.dart';
 import '../exceptions/conversation_already_exists.dart';

@@ -1,3 +1,9 @@
+/*
+  SPDX-FileCopyrightText: 2026 Siddhant Sharma <sharmasiddhant@proton.me>
+
+  SPDX-License-Identifier: GPL-3.0-or-later
+*/
+
 import 'package:get_it/get_it.dart';
 import 'storage/database.dart';
 import 'repositories/conversation_repository.dart';

@@ -1,3 +1,9 @@
+/*
+  SPDX-FileCopyrightText: 2026 Siddhant Sharma <sharmasiddhant@proton.me>
+
+  SPDX-License-Identifier: GPL-3.0-or-later
+*/
+
 import '../models/parsed.dart';
 
 ParsedLine? parseLine({required String line, required RegExp regExp}) {

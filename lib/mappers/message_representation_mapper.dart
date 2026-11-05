@@ -1,3 +1,9 @@
+/*
+  SPDX-FileCopyrightText: 2026 Siddhant Sharma <sharmasiddhant@proton.me>
+
+  SPDX-License-Identifier: GPL-3.0-or-later
+*/
+
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
 import '../utils/date_utils.dart';
