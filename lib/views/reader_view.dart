@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import '../app_dependencies_injection.dart';
 import '../mappers/message_representation_mapper.dart';
 import '../models/conversation_page.dart';
+import '../models/page_position.dart';
 import '../repositories/message_repository.dart';
 import '../utils/path_utils.dart';
 import 'conversation_page_view.dart';
@@ -17,7 +18,6 @@ class ReaderView extends StatefulWidget {
   final String conversationTitle;
   final int totalPages;
   final int initialPageIndex;
-  final Future<(int?, int?)> Function(DateTime timestamp) fetchPageAndOffset;
   final void Function(int messageId) onProgressChanged;
 
   const ReaderView({
@@ -26,7 +26,6 @@ class ReaderView extends StatefulWidget {
     required this.conversationTitle,
     required this.totalPages,
     required this.initialPageIndex,
-    required this.fetchPageAndOffset,
     required this.onProgressChanged,
   });
 
@@ -118,20 +117,26 @@ class _ReaderViewState extends State<ReaderView> {
       return;
     }
 
-    final (pageIndex, messageIndex) = await widget.fetchPageAndOffset(
-      selectedTimestamp,
+    final offset = await _messageRepository.getMessageOffsetByTimestamp(
+      conversationId: widget.conversationId,
+      timestamp: selectedTimestamp,
     );
 
-    if (!mounted || pageIndex == null || messageIndex == null) {
+    if (!mounted || offset == null) {
       return;
     }
 
+    final position = PagePosition.fromOffset(
+      offset: offset,
+      pageSize: _pageSize,
+    );
+
     setState(() {
-      _jumpMessageIndex = messageIndex;
+      _jumpMessageIndex = position.itemIndex;
       _jumpToken++;
     });
 
-    await _loadPage(pageIndex);
+    await _loadPage(position.pageIndex);
   }
 
   Widget _buildPageContent() {

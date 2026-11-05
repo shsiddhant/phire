@@ -48,24 +48,6 @@ class _HomePageState extends State<HomePage> {
     return conversations;
   }
 
-  Future<(int?, int?)> _fetchPageAndOffset({
-    required int conversationId,
-    required DateTime timestamp,
-  }) async {
-    final offset = await messageRepository.getMessageOffsetByTimestamp(
-      conversationId: conversationId,
-      timestamp: timestamp,
-    );
-    if (offset == null) {
-      return (null, null);
-    } else {
-      final pageIndex = offset ~/ _pageSize;
-      final messageIndex = offset % _pageSize;
-
-      return (pageIndex, messageIndex);
-    }
-  }
-
   Future<void> _onReadingProgressChanged({
     required int conversationId,
     required int messageId,
@@ -188,7 +170,6 @@ class _HomePageState extends State<HomePage> {
           return ConversationListView(
             conversations: snapshot.data!,
             onImportRequested: _pickAndImportFile,
-            fetchPageAndOffset: _fetchPageAndOffset,
             onProgressChanged: _onReadingProgressChanged,
             getInitalPageIndex: _getInitialPageIndex,
           );

@@ -12,11 +12,6 @@ import 'reader_view.dart';
 class ConversationListView extends StatelessWidget {
   final List<ConversationListItem> conversations;
   final VoidCallback onImportRequested;
-  final Future<(int?, int?)> Function({
-    required int conversationId,
-    required DateTime timestamp,
-  })
-  fetchPageAndOffset;
   final Future<void> Function({
     required int conversationId,
     required int messageId,
@@ -28,7 +23,6 @@ class ConversationListView extends StatelessWidget {
     super.key,
     required this.conversations,
     required this.onImportRequested,
-    required this.fetchPageAndOffset,
     required this.onProgressChanged,
     required this.getInitalPageIndex,
   });
@@ -113,12 +107,6 @@ class ConversationListView extends StatelessWidget {
                                         currentConversation.title,
                                     totalPages: currentConversation.totalPages,
                                     initialPageIndex: initialPageIndex,
-                                    fetchPageAndOffset: (DateTime timestamp) =>
-                                        fetchPageAndOffset(
-                                          conversationId:
-                                              currentConversation.id,
-                                          timestamp: timestamp,
-                                        ),
                                     onProgressChanged: (int messageId) =>
                                         onProgressChanged(
                                           conversationId:
