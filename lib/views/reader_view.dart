@@ -9,6 +9,7 @@ import '../app_dependencies_injection.dart';
 import '../mappers/message_representation_mapper.dart';
 import '../models/conversation_page.dart';
 import '../models/page_position.dart';
+import '../repositories/conversation_repository.dart';
 import '../repositories/message_repository.dart';
 import '../utils/path_utils.dart';
 import 'conversation_page_view.dart';
@@ -18,7 +19,6 @@ class ReaderView extends StatefulWidget {
   final String conversationTitle;
   final int totalPages;
   final int initialPageIndex;
-  final void Function(int messageId) onProgressChanged;
 
   const ReaderView({
     super.key,
@@ -26,7 +26,6 @@ class ReaderView extends StatefulWidget {
     required this.conversationTitle,
     required this.totalPages,
     required this.initialPageIndex,
-    required this.onProgressChanged,
   });
 
   @override
@@ -36,6 +35,8 @@ class ReaderView extends StatefulWidget {
 class _ReaderViewState extends State<ReaderView> {
   final int _pageSize = 30;
   final MessageRepository _messageRepository = locator<MessageRepository>();
+  final ConversationRepository _conversationRepository =
+      locator<ConversationRepository>();
 
   int _activePageIndex = 0;
 
@@ -87,7 +88,10 @@ class _ReaderViewState extends State<ReaderView> {
 
       if (page.messages.isNotEmpty) {
         final firstMessageId = page.messages.first.id;
-        widget.onProgressChanged(firstMessageId);
+        await _conversationRepository.updateReadingProgress(
+          conversationId: widget.conversationId,
+          messageId: firstMessageId,
+        );
       }
     } catch (e) {
       if (!mounted) return;

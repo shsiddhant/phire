@@ -48,16 +48,6 @@ class _HomePageState extends State<HomePage> {
     return conversations;
   }
 
-  Future<void> _onReadingProgressChanged({
-    required int conversationId,
-    required int messageId,
-  }) async {
-    await conversationRepository.updateReadingProgress(
-      conversationId: conversationId,
-      messageId: messageId,
-    );
-  }
-
   Future<int> _getInitialPageIndex({required int conversationId}) async {
     final progress = await conversationRepository.getReadingProgress(
       conversationId,
@@ -170,7 +160,6 @@ class _HomePageState extends State<HomePage> {
           return ConversationListView(
             conversations: snapshot.data!,
             onImportRequested: _pickAndImportFile,
-            onProgressChanged: _onReadingProgressChanged,
             getInitalPageIndex: _getInitialPageIndex,
           );
         }

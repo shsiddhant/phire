@@ -12,18 +12,12 @@ import 'reader_view.dart';
 class ConversationListView extends StatelessWidget {
   final List<ConversationListItem> conversations;
   final VoidCallback onImportRequested;
-  final Future<void> Function({
-    required int conversationId,
-    required int messageId,
-  })
-  onProgressChanged;
   final Future<int> Function({required int conversationId}) getInitalPageIndex;
 
   const ConversationListView({
     super.key,
     required this.conversations,
     required this.onImportRequested,
-    required this.onProgressChanged,
     required this.getInitalPageIndex,
   });
 
@@ -107,12 +101,6 @@ class ConversationListView extends StatelessWidget {
                                         currentConversation.title,
                                     totalPages: currentConversation.totalPages,
                                     initialPageIndex: initialPageIndex,
-                                    onProgressChanged: (int messageId) =>
-                                        onProgressChanged(
-                                          conversationId:
-                                              currentConversation.id,
-                                          messageId: messageId,
-                                        ),
                                   );
                                 },
                               );
