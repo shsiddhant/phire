@@ -176,12 +176,17 @@ class _ReaderViewState extends State<ReaderView> {
       pageSize: _pageSize,
     );
 
+    await _loadPage(position.pageIndex);
+
+    if (!mounted || _error != null) {
+      return;
+    }
+
     setState(() {
       _jumpMessageIndex = position.itemIndex;
       _jumpToken++;
     });
 
-    await _loadPage(position.pageIndex);
   }
 
   Widget _buildPageContent() {
