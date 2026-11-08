@@ -7,6 +7,11 @@
 abstract class BasePage<T> {
   final int pageNumber;
   final List<T> items;
+  final bool hasMore;
 
-  BasePage({required this.pageNumber, required this.items});
+  BasePage({
+    required this.pageNumber,
+    required this.items,
+    required this.hasMore,
+  });
 }

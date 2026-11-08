@@ -4,6 +4,8 @@
   SPDX-License-Identifier: GPL-3.0-or-later
 */
 
+import 'abstract_page.dart';
+
 class SearchResult {
   final int messageId;
   final String sender;
@@ -19,3 +21,11 @@ class SearchResult {
 }
 
 enum SearchSort { newestFirst, oldestFirst, relevance }
+
+class SearchPage extends BasePage<SearchResult> {
+  SearchPage({
+    required super.items,
+    required super.pageNumber,
+    required super.hasMore,
+  });
+}
