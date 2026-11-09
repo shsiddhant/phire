@@ -3,14 +3,24 @@
 ![Flutter](https://img.shields.io/badge/Flutter-%235FC9F8.svg?style=for-the-badge&logo=Flutter&logoColor=white)
 [![LICENSE: GPLv3](https://img.shields.io/badge/LICENSE-GPL_v3-blue?style=for-the-badge)](LICENSE)
 
-Phire is a conversation reader that reimagines your chat history into a book-like reading experience, with navigation and structure instead of endless scrolling.
+Phire is a conversation reader that reimagines your chat history into a book-like structured reading experience.
+
+**Phire** (pronounced _fee-ray_) takes its name from the Bengali word **ফিরে**, meaning _back_ or _returning_.
+
+## Screenshots
+
+|                   Conversations                   |                       Reader                        |                       Search                        |
+| :-----------------------------------------------: | :-------------------------------------------------: | :-------------------------------------------------: |
+| <img src="screenshots/home_page.png" width="250"> | <img src="screenshots/reader_view.png" width="250"> | <img src="screenshots/search_view.png" width="250"> |
 
 ## Vision
 
 Chat apps are great for communication but terrible for revisiting conversations, with no navigation and require an awful lot of scrolling.
-**Phire** explores a different approach, treating chats as something you can navigate and read, not just scroll through.
+
+**Phire** explores a different approach, treating conversations as something you want to read, explore, and revisit.
 
 Think:
+
 - Jumping to specific days or moments
 - Navigating like pages in a book
 - Bookmarks
@@ -18,19 +28,24 @@ Think:
 
 ## Features
 
-- WhatsApp chat import
-- Page-based navigation
-- Day separators and sender grouping
+- Import WhatsApp chat with or without media
+- Navigate conversations by pages and dates
+- Resume reading where you left off
+- Search messages in a conversation and jump to selected message
+- View animated stickers and open other media/attachments externally
 
 ## Roadmap
 
 - [x] Navigate to specific dates
-- [ ] Track and restore reading position
-- [ ] Search through messages
+- [x] WhatsApp ZIP archive import
+- [x] Show stickers and handle other attachments
+- [x] Track and restore reading position
+- [x] Search through messages
 - [ ] Bookmarks
 - [ ] Annotations
 
 ## License
-This project is licensed under the GNU General Public License v3.0.
+
+This project is licensed under the GNU General Public License v3.0 or later.
 
 See [LICENSE](LICENSE) for details.
