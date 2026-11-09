@@ -5,6 +5,8 @@
 */
 
 import 'package:get_it/get_it.dart';
+import 'repositories/abstract_search_repository.dart';
+import 'repositories/sqlite_search_repository.dart';
 import 'storage/database.dart';
 import 'repositories/conversation_repository.dart';
 import 'repositories/message_repository.dart';
@@ -26,6 +28,10 @@ void setupDependencyInjection() {
 
   locator.registerLazySingleton<ImportRepository>(
     () => ImportRepository(locator<AppDatabase>()),
+  );
+
+  locator.registerLazySingleton<SearchRepository>(
+    () => SqliteSearchRepository(locator<AppDatabase>()),
   );
 
   locator.registerLazySingleton<ImportWhatsappService>(

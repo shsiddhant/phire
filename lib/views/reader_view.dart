@@ -4,15 +4,20 @@
   SPDX-License-Identifier: GPL-3.0-or-later
 */
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../app_dependencies_injection.dart';
+import '../controllers/search_controller.dart';
 import '../mappers/message_representation_mapper.dart';
 import '../models/conversation_page.dart';
 import '../models/page_position.dart';
+import '../models/search.dart';
+import '../repositories/abstract_search_repository.dart';
 import '../repositories/conversation_repository.dart';
 import '../repositories/message_repository.dart';
 import '../utils/path_utils.dart';
 import 'conversation_page_view.dart';
+import 'search_view.dart';
 
 class ReaderView extends StatefulWidget {
   final int conversationId;
@@ -35,6 +40,9 @@ class _ReaderViewState extends State<ReaderView> {
   final MessageRepository _messageRepository = locator<MessageRepository>();
   final ConversationRepository _conversationRepository =
       locator<ConversationRepository>();
+  final SearchRepository _searchRepository = locator<SearchRepository>();
+
+  late final AppSearchController _searchController;
 
   int _activePageIndex = 0;
 
@@ -48,7 +56,14 @@ class _ReaderViewState extends State<ReaderView> {
   @override
   void initState() {
     super.initState();
+    _searchController = AppSearchController(_searchRepository);
     _initialize();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<int> _getInitialPageIndex() async {
@@ -150,22 +165,8 @@ class _ReaderViewState extends State<ReaderView> {
     }
   }
 
-  Future<void> _jumpToDate() async {
-    final selectedTimestamp = await showDatePicker(
-      context: context,
-      firstDate: DateTime(2000),
-      lastDate: DateTime.now(),
-      currentDate: DateTime.now(),
-    );
-
-    if (selectedTimestamp == null) {
-      return;
-    }
-
-    final offset = await _messageRepository.getMessageOffsetByTimestamp(
-      conversationId: widget.conversationId,
-      timestamp: selectedTimestamp,
-    );
+  Future<void> _jumpToMessage(Future<int?> Function() fetchOffset) async {
+    final offset = await fetchOffset();
 
     if (!mounted || offset == null) {
       return;
@@ -186,7 +187,35 @@ class _ReaderViewState extends State<ReaderView> {
       _jumpMessageIndex = position.itemIndex;
       _jumpToken++;
     });
+  }
 
+  Future<void> _jumpToDate() async {
+    final selectedTimestamp = await showDatePicker(
+      context: context,
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+      currentDate: DateTime.now(),
+    );
+
+    if (selectedTimestamp == null) {
+      return;
+    }
+
+    await _jumpToMessage(
+      () => _messageRepository.getMessageOffsetByTimestamp(
+        conversationId: widget.conversationId,
+        timestamp: selectedTimestamp,
+      ),
+    );
+  }
+
+  Future<void> _jumpToMessageId(int messageId) async {
+    await _jumpToMessage(
+      () => _messageRepository.getMessageOffsetByMessageId(
+        conversationId: widget.conversationId,
+        messageId: messageId,
+      ),
+    );
   }
 
   Widget _buildPageContent() {
@@ -218,6 +247,26 @@ class _ReaderViewState extends State<ReaderView> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.conversationTitle),
         actions: [
+          IconButton(
+            onPressed: () async {
+              final SearchResult? result = await Navigator.push(
+                context,
+                CupertinoPageRoute(
+                  builder: (BuildContext context) {
+                    return SearchView(
+                      conversationId: widget.conversationId,
+                      searchController: _searchController,
+                    );
+                  },
+                ),
+              );
+
+              if (result != null && mounted) {
+                await _jumpToMessageId(result.messageId);
+              }
+            },
+            icon: const Icon(Icons.search),
+          ),
           IconButton(
             onPressed: _jumpToDate,
             icon: const Icon(Icons.calendar_today),
