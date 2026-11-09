@@ -65,10 +65,15 @@ class _ConversationPageView extends State<ConversationPageView> {
         lastVisible.index == totalItems - 1 &&
         lastVisible.itemTrailingEdge <= 1;
 
-    setState(() {
-      _showTopFade = !isAtAbsoluteTop;
-      _showBottomFade = !isAtAbsoluteBottom;
-    });
+    final nextTopFade = !isAtAbsoluteTop;
+    final nextBottomFade = !isAtAbsoluteBottom;
+
+    if (_showTopFade != nextTopFade || _showBottomFade != nextBottomFade) {
+      setState(() {
+        _showTopFade = nextTopFade;
+        _showBottomFade = nextBottomFade;
+      });
+    }
   }
 
   @override
