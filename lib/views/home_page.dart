@@ -48,11 +48,11 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _pickAndImportFile() async {
     try {
-      FilePickerResult? result = await FilePicker.pickFiles(type: FileType.any);
+      List<PlatformFile> files = await FilePicker.pickFiles(type: FileType.any);
 
-      if (result == null || result.files.first.path == null) return;
+      if (files.isEmpty || files.first.path == null) return;
 
-      File selectedFile = File(result.files.first.path!);
+      File selectedFile = File(files.first.path!);
 
       final defaultTitle = p.basenameWithoutExtension(selectedFile.path);
 
