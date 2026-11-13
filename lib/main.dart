@@ -4,7 +4,7 @@
   SPDX-License-Identifier: GPL-3.0-or-later
 */
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'app_dependencies_injection.dart';
 // import 'dev/widget_playground.dart';
 import 'views/home_page.dart';
