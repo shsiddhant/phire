@@ -1378,7 +1378,7 @@ class $$ConversationsTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$ConversationsTable, ConversationData>(table),
                   $$ConversationsTableReferences(db, table, e),
                 ),
               )
@@ -1395,10 +1395,11 @@ class $$ConversationsTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (messagesRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ConversationData,
                           $ConversationsTable,
-                          MessageData
+                          MessageData,
+                          $MessagesTable
                         >(
                           currentTable: table,
                           referencedTable: $$ConversationsTableReferences
@@ -1409,17 +1410,16 @@ class $$ConversationsTableTableManager
                                 table,
                                 p0,
                               ).messagesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.conversationId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'conversation_id',
                           typedResults: items,
                         ),
                       if (readingProgressRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ConversationData,
                           $ConversationsTable,
-                          ReadingProgressData
+                          ReadingProgressData,
+                          $ReadingProgressTable
                         >(
                           currentTable: table,
                           referencedTable: $$ConversationsTableReferences
@@ -1430,10 +1430,8 @@ class $$ConversationsTableTableManager
                                 table,
                                 p0,
                               ).readingProgressRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.conversationId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'conversation_id',
                           typedResults: items,
                         ),
                     ];
@@ -1802,7 +1800,7 @@ class $$MessagesTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$MessagesTable, MessageData>(table),
                   $$MessagesTableReferences(db, table, e),
                 ),
               )
@@ -1849,10 +1847,11 @@ class $$MessagesTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (readingProgressRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           MessageData,
                           $MessagesTable,
-                          ReadingProgressData
+                          ReadingProgressData,
+                          $ReadingProgressTable
                         >(
                           currentTable: table,
                           referencedTable: $$MessagesTableReferences
@@ -1863,10 +1862,8 @@ class $$MessagesTableTableManager
                                 table,
                                 p0,
                               ).readingProgressRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.messageId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'message_id',
                           typedResults: items,
                         ),
                     ];
@@ -2185,7 +2182,9 @@ class $$ReadingProgressTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$ReadingProgressTable, ReadingProgressData>(
+                    table,
+                  ),
                   $$ReadingProgressTableReferences(db, table, e),
                 ),
               )
