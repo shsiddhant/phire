@@ -6,6 +6,10 @@
 
 import '../models/parsed.dart';
 
+bool isSystemMessage(String line) {
+  return line.contains('Messages and calls are end-to-end encrypted');
+}
+
 ParsedLine? parseLine({required String line, required RegExp regExp}) {
   final match = regExp.firstMatch(line);
 
@@ -31,8 +35,6 @@ Stream<List<ParsedMessage>> parseFullExport(
   RegExp regExp, {
   int batchSize = 5000,
 }) async* {
-  // final lines = await file.readAsLines();
-
   List<ParsedMessage> messageBatch = [];
   ParsedLine? parsedLine;
   int lineNumber = 0;
@@ -45,13 +47,17 @@ Stream<List<ParsedMessage>> parseFullExport(
       }
 
       parsedLine = parseLine(line: line, regExp: regExp);
-      if (parsedLine == null && lineNumber == 0) {
+      if (parsedLine == null && isSystemMessage(line)) {
+        lineNumber++;
+        continue;
+      }
+      if (parsedLine == null && messageBatch.isEmpty) {
         throw FormatException('First line must contain all message fields');
       }
       if (parsedLine != null) {
         messageBatch.add(ParsedMessage.fromParsedLine(parsedLine));
         parsedLine = null;
-      } else if (parsedLine == null && lineNumber > 0) {
+      } else if (parsedLine == null && messageBatch.isNotEmpty) {
         messageBatch.last.text = '${messageBatch.last.text}\n$line';
       }
 
