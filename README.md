@@ -13,19 +13,6 @@ Phire is a conversation reader that reimagines your chat history into a book-lik
 | :-----------------------------------------------: | :-------------------------------------------------: | :-------------------------------------------------: |
 | <img src="screenshots/home_page.png" width="250"> | <img src="screenshots/reader_view.png" width="250"> | <img src="screenshots/search_view.png" width="250"> |
 
-## Vision
-
-Chat apps are great for communication but terrible for revisiting conversations, with no navigation and require an awful lot of scrolling.
-
-**Phire** explores a different approach, treating conversations as something you want to read, explore, and revisit.
-
-Think:
-
-- Jumping to specific days or moments
-- Navigating like pages in a book
-- Bookmarks
-- Annotations
-
 ## Features
 
 - Import WhatsApp chat with or without media
