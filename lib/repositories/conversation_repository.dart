@@ -67,4 +67,11 @@ class ConversationRepository {
           ..where((tbl) => tbl.conversationId.equals(conversationId)))
         .getSingleOrNull();
   }
+
+  // Delete conversation
+  Future<int> deleteConversation(int id) async {
+    return (db.delete(
+      db.conversations,
+    )..where((tbl) => tbl.id.equals(id))).go();
+  }
 }
