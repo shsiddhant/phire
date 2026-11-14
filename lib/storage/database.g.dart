@@ -424,7 +424,7 @@ class $MessagesTable extends Messages
     type: DriftSqlType.int,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES conversations (id)',
+      'REFERENCES conversations (id) ON DELETE CASCADE',
     ),
   );
   @override
@@ -789,7 +789,7 @@ class $ReadingProgressTable extends ReadingProgress
     type: DriftSqlType.int,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES conversations (id)',
+      'REFERENCES conversations (id) ON DELETE CASCADE',
     ),
   );
   static const VerificationMeta _messageIdMeta = const VerificationMeta(
@@ -1054,6 +1054,23 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     messages,
     readingProgress,
   ];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'conversations',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('messages', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'conversations',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('reading_progress', kind: UpdateKind.delete)],
+    ),
+  ]);
   @override
   DriftDatabaseOptions get options =>
       const DriftDatabaseOptions(storeDateTimeAsText: true);
