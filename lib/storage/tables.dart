@@ -13,7 +13,8 @@ class Messages extends Table {
   TextColumn get sender => text()();
   TextColumn get messageText => text()();
   TextColumn get attachment => text().nullable()();
-  IntColumn get conversationId => integer().references(Conversations, #id)();
+  IntColumn get conversationId =>
+      integer().references(Conversations, #id, onDelete: KeyAction.cascade)();
 }
 
 @DataClassName('ConversationData')
@@ -27,7 +28,8 @@ class Conversations extends Table {
 
 @DataClassName('ReadingProgressData')
 class ReadingProgress extends Table {
-  IntColumn get conversationId => integer().references(Conversations, #id)();
+  IntColumn get conversationId =>
+      integer().references(Conversations, #id, onDelete: KeyAction.cascade)();
   IntColumn get messageId => integer().references(Messages, #id)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
