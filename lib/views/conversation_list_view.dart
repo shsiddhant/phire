@@ -21,67 +21,68 @@ class ConversationListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: colorScheme.inversePrimary,
         title: Text('Conversations'),
-        actions: [
-          if (conversations.isNotEmpty)
-            IconButton(
-              onPressed: onImportRequested,
-              icon: const Icon(Icons.file_upload),
-              tooltip: 'Import WhatsApp file',
-            ),
-        ],
       ),
-      body: Center(
-        child: Padding(
-          padding: EdgeInsets.all(8.0),
-          child: conversations.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        'No conversations found. Please import one.',
-                        style: TextStyle(fontSize: 18),
+      body: conversations.isEmpty
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.forum_outlined,
+                      size: 56,
+                      color: colorScheme.secondary,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'No conversations yet',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Tap + to import a conversation.',
+                      style: TextStyle(color: colorScheme.onSurfaceVariant),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : ListView.builder(
+              itemCount: conversations.length,
+              itemBuilder: (BuildContext context, int index) {
+                final currentConversation = conversations[index];
+                return ListTile(
+                  title: Text(currentConversation.title),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      CupertinoPageRoute(
+                        builder: (BuildContext context) {
+                          return ReaderView(
+                            conversationId: currentConversation.id,
+                            conversationTitle: currentConversation.title,
+                            totalPages: currentConversation.totalPages,
+                          );
+                        },
                       ),
-                      const SizedBox(height: 16),
-                      ElevatedButton.icon(
-                        onPressed:
-                            onImportRequested, // Notify the parent to import data
-                        icon: const Icon(Icons.file_upload),
-                        label: const Text(
-                          'Select a file to import conversation.',
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              : ListView.builder(
-                  itemCount: conversations.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    final currentConversation = conversations[index];
-                    return ListTile(
-                      title: Text(currentConversation.title),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          CupertinoPageRoute(
-                            builder: (BuildContext context) {
-                              return ReaderView(
-                                conversationId: currentConversation.id,
-                                conversationTitle: currentConversation.title,
-                                totalPages: currentConversation.totalPages,
-                              );
-                            },
-                          ),
-                        );
-                      },
                     );
                   },
-                ),
-        ),
+                );
+              },
+            ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: onImportRequested,
+        backgroundColor: colorScheme.inversePrimary,
+        foregroundColor: colorScheme.onPrimaryContainer,
+        tooltip: 'Import a conversation',
+        child: const Icon(Icons.add),
       ),
     );
   }
