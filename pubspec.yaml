@@ -27,6 +27,7 @@ dependencies:
 
   material_ui: any
   cupertino_ui: any
+  url_launcher: ^6.3.3
 dev_dependencies:
   flutter_test:
     sdk: flutter

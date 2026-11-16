@@ -7,6 +7,8 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:material_ui/material_ui.dart';
 import '../models/conversation.dart';
+import '../widgets/action_menu.dart';
+import 'about_page.dart';
 import 'reader_view.dart';
 
 class ConversationListView extends StatelessWidget {
@@ -26,6 +28,20 @@ class ConversationListView extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: colorScheme.inversePrimary,
         title: Text('Conversations'),
+        actions: [
+          ActionMenuButton(
+            actions: [
+              ActionMenuItem(
+                label: 'About',
+                icon: Icons.info,
+                onTap: () => Navigator.push(
+                  context,
+                  CupertinoPageRoute(builder: (context) => AboutPage()),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       body: conversations.isEmpty
           ? Center(
