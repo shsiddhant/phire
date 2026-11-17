@@ -1,6 +1,7 @@
 # Phire
 
 ![Flutter](https://img.shields.io/badge/Flutter-%235FC9F8.svg?style=for-the-badge&logo=Flutter&logoColor=white)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/shsiddhant/phire/ci.yml?style=for-the-badge&logo=github&label=CI%20Pipeline&branch=main)](https://github.com/shsiddhant/phire/actions/workflows/ci.yml)
 [![LICENSE: GPLv3](https://img.shields.io/badge/LICENSE-GPL_v3-blue?style=for-the-badge)](LICENSE)
 
 Phire is a conversation reader that reimagines your chat history into a book-like structured reading experience.
