@@ -32,6 +32,7 @@ class _ConversationTitleDialogState extends State<ConversationTitleDialog> {
   late final TextEditingController _titleController;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? _errorMessage;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -70,6 +71,7 @@ class _ConversationTitleDialogState extends State<ConversationTitleDialog> {
   }
 
   Future<void> _submit() async {
+    if (_isSubmitting) return;
     final bool isValid = _formKey.currentState?.validate() ?? false;
 
     if (!isValid) {
@@ -78,6 +80,7 @@ class _ConversationTitleDialogState extends State<ConversationTitleDialog> {
 
     setState(() {
       _errorMessage = null;
+      _isSubmitting = true;
     });
 
     try {
@@ -94,37 +97,55 @@ class _ConversationTitleDialogState extends State<ConversationTitleDialog> {
         Navigator.pop(context);
       }
       widget.onError?.call(e);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(widget.title),
-      content: Form(
-        key: _formKey,
-        child: TextFormField(
-          forceErrorText: _errorMessage,
-          controller: _titleController,
-          autofocus: true,
-          textInputAction: TextInputAction.done,
-          textCapitalization: TextCapitalization.words,
-          decoration: const InputDecoration(
-            labelText: 'Conversation Title',
-            border: OutlineInputBorder(),
+    return PopScope(
+      canPop: !_isSubmitting,
+      child: AlertDialog(
+        title: Text(widget.title),
+        content: Form(
+          key: _formKey,
+          child: TextFormField(
+            forceErrorText: _errorMessage,
+            controller: _titleController,
+            autofocus: true,
+            textInputAction: TextInputAction.done,
+            textCapitalization: TextCapitalization.words,
+            decoration: const InputDecoration(
+              labelText: 'Conversation Title',
+              border: OutlineInputBorder(),
+            ),
+            validator: _validator,
+            onChanged: _onChanged,
+            onFieldSubmitted: (_) => _submit(),
           ),
-          validator: _validator,
-          onChanged: _onChanged,
-          onFieldSubmitted: (_) => _submit(),
         ),
+        actions: [
+          TextButton(
+            onPressed: _isSubmitting ? null : () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: _isSubmitting ? null : _submit,
+            child: _isSubmitting
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Text(widget.actionName),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text('Cancel'),
-        ),
-        TextButton(onPressed: _submit, child: Text(widget.actionName)),
-      ],
     );
   }
 }
