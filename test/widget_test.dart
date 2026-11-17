@@ -1,30 +1,46 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+/*
+  SPDX-FileCopyrightText: 2026 Siddhant Sharma <sharmasiddhant@proton.me>
+
+  SPDX-License-Identifier: GPL-3.0-or-later
+*/
 
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:phire/app_dependencies_injection.dart';
 
 import 'package:phire/main.dart';
+import 'package:phire/repositories/conversation_repository.dart';
+import 'package:phire/services/import_whatsapp_service.dart';
+
+class MockConversationRepository extends Mock
+    implements ConversationRepository {}
+
+class MockImportService extends Mock implements ImportWhatsappService {}
 
 void main() {
+  late MockConversationRepository mockConversationRepository;
+  late ImportWhatsappService importWhatsappService;
+
+  setUp(() {
+    mockConversationRepository = MockConversationRepository();
+    importWhatsappService = MockImportService();
+
+    locator.registerSingleton<ConversationRepository>(
+      mockConversationRepository,
+    );
+    locator.registerSingleton<ImportWhatsappService>(importWhatsappService);
+  });
+
+  tearDown(() async {
+    await locator.reset();
+  });
+
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const MyApp());
-
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.byType(MaterialApp), findsOneWidget);
   });
 }
