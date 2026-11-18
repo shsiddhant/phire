@@ -13,8 +13,13 @@ import '../models/message.dart';
 
 class MessageTile extends StatelessWidget {
   final MessageRepresentation messageRepr;
+  final bool isHighlighted;
 
-  const MessageTile({super.key, required this.messageRepr});
+  const MessageTile({
+    super.key,
+    required this.messageRepr,
+    this.isHighlighted = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,11 +31,18 @@ class MessageTile extends StatelessWidget {
           if (messageRepr.isFirstOfDay) _DayMarker(messageRepr.dayMarker),
           if (messageRepr.showSenderHeader)
             _SenderHeader(sender: messageRepr.senderName),
-          _MessageRow(
-            formattedTime: messageRepr.formattedTime,
-            messageText: messageRepr.messageText,
-            attachmentFilePath: messageRepr.attachmentFilePath,
-            renderAttachment: messageRepr.renderAttachment,
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 350),
+            curve: Curves.easeOut,
+            color: isHighlighted
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)
+                : Colors.transparent,
+            child: _MessageRow(
+              formattedTime: messageRepr.formattedTime,
+              messageText: messageRepr.messageText,
+              attachmentFilePath: messageRepr.attachmentFilePath,
+              renderAttachment: messageRepr.renderAttachment,
+            ),
           ),
         ],
       ),
