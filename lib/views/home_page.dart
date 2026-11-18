@@ -159,6 +159,46 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Future<void> _renameConversation(ConversationListItem conversation) async {
+    try {
+      await showDialog(
+        context: context,
+        builder: (BuildContext context) => ConversationTitleDialog(
+          title: 'Rename Conversation',
+          defaultConversationTitle: conversation.title,
+          actionName: 'Rename',
+          onSubmit: (title) async {
+            await conversationRepository.renameConversation(
+              id: conversation.id,
+              newTitle: title,
+            );
+
+            if (!context.mounted) return;
+
+            setState(() {
+              _processedConversations = _loadConversations();
+            });
+          },
+          onError: (error) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Failed to rename conversation: $error'),
+                ),
+              );
+            }
+          },
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to rename conversation: $e')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -181,6 +221,7 @@ class _HomePageState extends State<HomePage> {
             conversations: snapshot.data!,
             onImportRequested: _pickAndImportFile,
             onDeleteRequested: _deleteConversation,
+            onRenameRequested: _renameConversation,
           );
         }
 
