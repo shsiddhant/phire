@@ -6,8 +6,10 @@
 
 import 'package:drift/drift.dart';
 
+import '../exceptions/conversation_already_exists.dart';
 import '../models/conversation.dart';
 import '../storage/database.dart';
+import '../storage/drift_exception_extensions.dart';
 
 class ConversationRepository {
   final AppDatabase db;
@@ -73,5 +75,22 @@ class ConversationRepository {
     return (db.delete(
       db.conversations,
     )..where((tbl) => tbl.id.equals(id))).go();
+  }
+
+  // Rename conversation
+  Future<int> renameConversation({
+    required int id,
+    required String newTitle,
+  }) async {
+    try {
+      return await (db.update(db.conversations)
+            ..where((tbl) => tbl.id.equals(id)))
+          .write(ConversationsCompanion(title: Value(newTitle)));
+    } on Exception catch (e) {
+      if (e.isUniqueConstraint) {
+        throw const ConversationAlreadyExistsException();
+      }
+      rethrow;
+    }
   }
 }
