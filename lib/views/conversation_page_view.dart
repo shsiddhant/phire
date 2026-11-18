@@ -4,8 +4,11 @@
   SPDX-License-Identifier: GPL-3.0-or-later
 */
 
+import 'dart:async';
+
 import 'package:material_ui/material_ui.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+
 import '../widgets/message_tile.dart';
 import '../models/conversation_page.dart';
 
@@ -32,6 +35,18 @@ class _ConversationPageView extends State<ConversationPageView> {
 
   bool _showTopFade = false;
   bool _showBottomFade = false;
+  Timer? _highlightTimer;
+  int? _highlightedMessageId;
+
+  void _triggerHighlight(int messageId) {
+    _highlightTimer?.cancel();
+    setState(() => _highlightedMessageId = messageId);
+
+    _highlightTimer = Timer(const Duration(milliseconds: 750), () {
+      if (!mounted) return;
+      setState(() => _highlightedMessageId = null);
+    });
+  }
 
   @override
   void initState() {
@@ -42,6 +57,7 @@ class _ConversationPageView extends State<ConversationPageView> {
   @override
   void dispose() {
     _itemPositionsListener.itemPositions.removeListener(_updateFadeVisibility);
+    _highlightTimer?.cancel();
     super.dispose();
   }
 
@@ -94,12 +110,21 @@ class _ConversationPageView extends State<ConversationPageView> {
     // Scroll to message on jump to message index trigger from parent (ReaderView)
     if (widget.jumpToken != oldWidget.jumpToken &&
         widget.jumpMessageIndex != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _itemScrollController.scrollTo(
-          index: widget.jumpMessageIndex!,
+      final targetIndex = widget.jumpMessageIndex!;
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await _itemScrollController.scrollTo(
+          index: targetIndex,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
         );
+
+        if (!mounted || widget.page.messages.isEmpty) return;
+
+        final highlightIndex = targetIndex.clamp(
+          0,
+          widget.page.messages.length - 1,
+        );
+        _triggerHighlight(widget.page.messages[highlightIndex].id);
       });
     }
   }
@@ -111,7 +136,11 @@ class _ConversationPageView extends State<ConversationPageView> {
       itemCount: widget.page.messages.length,
       itemBuilder: (BuildContext context, int index) {
         final messageRepr = widget.page.messages[index];
-        return MessageTile(messageRepr: messageRepr);
+        final isHighlighted = _highlightedMessageId == messageRepr.id;
+        return MessageTile(
+          messageRepr: messageRepr,
+          isHighlighted: isHighlighted,
+        );
       },
       itemScrollController: _itemScrollController,
       itemPositionsListener: _itemPositionsListener,
