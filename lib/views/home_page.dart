@@ -14,6 +14,8 @@ import '../app_dependencies_injection.dart';
 import '../models/conversation.dart';
 import '../repositories/conversation_repository.dart';
 import '../services/import_whatsapp_service.dart';
+import '../utils/path_utils.dart';
+import '../widgets/confirm_dialog.dart';
 import '../widgets/conversation_title_dialog.dart';
 import 'conversation_list_view.dart';
 
@@ -119,6 +121,44 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> _deleteConversation(int id) async {
+    final confirmed = await showConfirmDialog(
+      context: context,
+      title: 'Delete Conversation',
+      message:
+          'Are you sure you want to delete this conversation? This action cannot be undone.',
+      confirmActionName: 'Delete',
+      onConfirm: () async {
+        await conversationRepository.deleteConversation(id);
+
+        try {
+          final mediaPath = await getConversationMediaPath(id);
+          final mediaDir = Directory(mediaPath);
+
+          if (await mediaDir.exists()) {
+            await mediaDir.delete(recursive: true);
+          }
+        } catch (e, stackTrace) {
+          debugPrint('Failed to delete conversation media: $e');
+          debugPrintStack(stackTrace: stackTrace);
+          // TODO: Cleanup for orphaned media in case of failure
+        }
+      },
+      errorMessageBuilder: (error) =>
+          'Failed to delete conversation. Please try again.',
+    );
+
+    if (!mounted || !confirmed) return;
+
+    setState(() {
+      _processedConversations = _loadConversations();
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Conversation deleted successfully.')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -140,6 +180,7 @@ class _HomePageState extends State<HomePage> {
           return ConversationListView(
             conversations: snapshot.data!,
             onImportRequested: _pickAndImportFile,
+            onDeleteRequested: _deleteConversation,
           );
         }
 
