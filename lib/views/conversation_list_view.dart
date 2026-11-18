@@ -15,12 +15,15 @@ class ConversationListView extends StatelessWidget {
   final List<ConversationListItem> conversations;
   final VoidCallback onImportRequested;
   final Future<void> Function(int conversationId) onDeleteRequested;
+  final Future<void> Function(ConversationListItem conversation)
+  onRenameRequested;
 
   const ConversationListView({
     super.key,
     required this.conversations,
     required this.onImportRequested,
     required this.onDeleteRequested,
+    required this.onRenameRequested,
   });
 
   @override
@@ -95,6 +98,11 @@ class ConversationListView extends StatelessWidget {
                   trailing: ActionMenuButton(
                     position: .under,
                     actions: [
+                      ActionMenuItem(
+                        label: 'Rename',
+                        icon: Icons.edit_outlined,
+                        onTap: () => onRenameRequested(currentConversation),
+                      ),
                       ActionMenuItem(
                         label: 'Delete',
                         icon: Icons.delete_outline,
