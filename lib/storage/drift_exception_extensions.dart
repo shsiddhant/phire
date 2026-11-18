@@ -7,11 +7,14 @@
 import 'package:drift/isolate.dart';
 import 'package:drift/native.dart';
 
-extension DriftRemoteExceptionX on DriftRemoteException {
+extension DriftExceptionX on Exception {
   static const _sqliteConstraintUnique = 2067;
 
   bool get isUniqueConstraint {
-    final cause = remoteCause;
+    final cause = switch (this) {
+      DriftRemoteException(:final remoteCause) => remoteCause,
+      _ => this,
+    };
     return cause is SqliteException &&
         cause.extendedResultCode == _sqliteConstraintUnique;
   }

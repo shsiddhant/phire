@@ -5,7 +5,6 @@
 */
 
 import 'package:drift/drift.dart';
-import 'package:drift/isolate.dart';
 import '../exceptions/conversation_already_exists.dart';
 import '../imports/mappers/parsed_message_mapping.dart';
 import '../storage/database.dart';
@@ -28,7 +27,7 @@ class ImportRepository {
             ConversationsCompanion.insert(title: title, source: Value(source)),
           );
       return conversationId;
-    } on DriftRemoteException catch (e) {
+    } on Exception catch (e) {
       if (e.isUniqueConstraint) {
         throw const ConversationAlreadyExistsException();
       }
