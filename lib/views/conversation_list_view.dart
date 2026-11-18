@@ -14,11 +14,13 @@ import 'reader_view.dart';
 class ConversationListView extends StatelessWidget {
   final List<ConversationListItem> conversations;
   final VoidCallback onImportRequested;
+  final Future<void> Function(int conversationId) onDeleteRequested;
 
   const ConversationListView({
     super.key,
     required this.conversations,
     required this.onImportRequested,
+    required this.onDeleteRequested,
   });
 
   @override
@@ -90,6 +92,16 @@ class ConversationListView extends StatelessWidget {
                       ),
                     );
                   },
+                  trailing: ActionMenuButton(
+                    position: .under,
+                    actions: [
+                      ActionMenuItem(
+                        label: 'Delete',
+                        icon: Icons.delete_outline,
+                        onTap: () => onDeleteRequested(currentConversation.id),
+                      ),
+                    ],
+                  ),
                 );
               },
             ),
