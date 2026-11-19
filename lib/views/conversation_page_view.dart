@@ -33,7 +33,6 @@ class _ConversationPageView extends State<ConversationPageView> {
   final ItemPositionsListener _itemPositionsListener =
       ItemPositionsListener.create();
 
-  bool _showTopFade = false;
   bool _showBottomFade = false;
   Timer? _highlightTimer;
   int? _highlightedMessageId;
@@ -67,26 +66,19 @@ class _ConversationPageView extends State<ConversationPageView> {
       return;
     }
     final totalItems = widget.page.messages.length;
-    final firstVisible = positions.reduce(
-      (min, p) => p.index < min.index ? p : min,
-    );
     final lastVisible = positions.reduce(
       (max, p) => p.index > max.index ? p : max,
     );
-    final isAtAbsoluteTop =
-        firstVisible.index == 0 && firstVisible.itemLeadingEdge >= 0;
 
     // itemTrailingEdge >= 1 means the bottom of the item is at or below the bottom viewport edge
     final isAtAbsoluteBottom =
         lastVisible.index == totalItems - 1 &&
         lastVisible.itemTrailingEdge <= 1;
 
-    final nextTopFade = !isAtAbsoluteTop;
     final nextBottomFade = !isAtAbsoluteBottom;
 
-    if (_showTopFade != nextTopFade || _showBottomFade != nextBottomFade) {
+    if (_showBottomFade != nextBottomFade) {
       setState(() {
-        _showTopFade = nextTopFade;
         _showBottomFade = nextBottomFade;
       });
     }
@@ -148,24 +140,6 @@ class _ConversationPageView extends State<ConversationPageView> {
     return Stack(
       children: [
         listview,
-        if (_showTopFade)
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 48,
-            child: IgnorePointer(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [bgColor, bgColor.withAlpha(0)],
-                  ),
-                ),
-              ),
-            ),
-          ),
         if (_showBottomFade)
           Positioned(
             bottom: 0,
