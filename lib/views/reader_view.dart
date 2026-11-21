@@ -56,7 +56,10 @@ class _ReaderViewState extends State<ReaderView> {
   @override
   void initState() {
     super.initState();
-    _searchController = AppSearchController(_searchRepository);
+    _searchController = AppSearchController(
+      conversationId: widget.conversationId,
+      searchRepository: _searchRepository,
+    );
     _initialize();
   }
 
