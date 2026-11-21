@@ -11,8 +11,12 @@ import '../repositories/abstract_search_repository.dart';
 
 class AppSearchController extends ChangeNotifier {
   final SearchRepository _searchRepository;
+  final int conversationId;
 
-  AppSearchController(this._searchRepository);
+  AppSearchController({
+    required this.conversationId,
+    required this._searchRepository,
+  });
 
   static const int _pageSize = 50;
 
@@ -20,6 +24,7 @@ class AppSearchController extends ChangeNotifier {
   String get currentQuery => _currentQuery;
 
   SearchSort _sortOrder = SearchSort.oldestFirst;
+  SearchSort get sortOrder => _sortOrder;
 
   SearchPage? _currentPage;
   SearchPage? get currentPage => _currentPage;
@@ -32,34 +37,41 @@ class AppSearchController extends ChangeNotifier {
 
   int _requestId = 0;
 
-  Future<void> doSearch({
-    required int conversationId,
-    required String query,
-    SearchSort sortOrder = SearchSort.oldestFirst,
-  }) async {
+  Future<void> updateSort(SearchSort newSortOrder) async {
+    if (_sortOrder == newSortOrder) return;
+    _sortOrder = newSortOrder;
+
+    if (_currentQuery.isEmpty) {
+      notifyListeners();
+      return;
+    }
+    await doSearch(query: _currentQuery);
+  }
+
+  Future<void> doSearch({required String query, SearchSort? sortOrder}) async {
     final trimmedQuery = query.trim();
 
-    if (trimmedQuery.isEmpty) return;
+    if (sortOrder != null) {
+      _sortOrder = sortOrder;
+    }
+
+    if (trimmedQuery.isEmpty) {
+      clearSearch();
+      return;
+    }
 
     _currentQuery = trimmedQuery;
-    _sortOrder = sortOrder;
 
-    await _loadPage(conversationId: conversationId, pageIndex: 0);
+    await _loadPage(0);
   }
 
-  Future<void> goToPage({
-    required int conversationId,
-    required int pageIndex,
-  }) async {
+  Future<void> goToPage(int pageIndex) async {
     if (_isLoading || pageIndex < 0) return;
 
-    await _loadPage(conversationId: conversationId, pageIndex: pageIndex);
+    await _loadPage(pageIndex);
   }
 
-  Future<void> _loadPage({
-    required int conversationId,
-    required int pageIndex,
-  }) async {
+  Future<void> _loadPage(int pageIndex) async {
     final requestId = ++_requestId;
     final query = _currentQuery;
     final sortOrder = _sortOrder;

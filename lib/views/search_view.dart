@@ -85,11 +85,47 @@ class _SearchViewState extends State<SearchView> {
     );
   }
 
-  void _search() {
-    widget.searchController.doSearch(
-      conversationId: widget.conversationId,
-      query: _textController.text,
+  Widget _buildSearchToolbar(
+    BuildContext context,
+    AppSearchController searchController,
+  ) {
+    final sortOrder = searchController.sortOrder;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: Row(
+        children: [
+          Text(
+            'Search results',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const Spacer(),
+          TextButton.icon(
+            label: Text(
+              sortOrder == .oldestFirst ? 'Oldest first' : 'Newest first',
+            ),
+            onPressed: searchController.isLoading
+                ? null
+                : () {
+                    final SearchSort nextSort =
+                        searchController.sortOrder == .oldestFirst
+                        ? .newestFirst
+                        : .oldestFirst;
+                    searchController.updateSort(nextSort);
+                  },
+            icon: Icon(
+              sortOrder == .oldestFirst
+                  ? Icons.arrow_upward
+                  : Icons.arrow_downward,
+            ),
+          ),
+        ],
+      ),
     );
+  }
+
+  void _search() {
+    widget.searchController.doSearch(query: _textController.text);
   }
 
   void _clearSearch() {
@@ -98,10 +134,7 @@ class _SearchViewState extends State<SearchView> {
   }
 
   void _goToPage(int pageIndex) {
-    widget.searchController.goToPage(
-      conversationId: widget.conversationId,
-      pageIndex: pageIndex,
-    );
+    widget.searchController.goToPage(pageIndex);
   }
 
   @override
@@ -115,6 +148,7 @@ class _SearchViewState extends State<SearchView> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
+    final searchController = widget.searchController;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: colorScheme.inversePrimary,
@@ -149,33 +183,45 @@ class _SearchViewState extends State<SearchView> {
             ),
           ),
           onSubmitted: (value) {
-            widget.searchController.doSearch(
-              conversationId: widget.conversationId,
-              query: value,
-            );
+            searchController.doSearch(query: value);
           },
         ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(5.0),
         child: ListenableBuilder(
-          listenable: widget.searchController,
+          listenable: searchController,
           builder: (context, child) {
-            final page = widget.searchController.currentPage;
-            final isLoading = widget.searchController.isLoading;
+            final page = searchController.currentPage;
+            final isLoading = searchController.isLoading;
+            final hasResults =
+                searchController.currentQuery.isNotEmpty &&
+                page != null &&
+                page.items.isNotEmpty;
 
             return SizedBox.expand(
               child: Stack(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      bottom: 80,
-                      top: 8,
-                      left: 20,
-                      right: 20,
-                    ),
-                    child: _buildPageContent(),
+                  Column(
+                    children: [
+                      if (hasResults) ...[
+                        _buildSearchToolbar(context, searchController),
+                        const Divider(height: 1),
+                      ],
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            bottom: 80,
+                            top: 8,
+                            left: 20,
+                            right: 20,
+                          ),
+                          child: _buildPageContent(),
+                        ),
+                      ),
+                    ],
                   ),
+
                   Positioned(
                     bottom: 24,
                     left: 0,
